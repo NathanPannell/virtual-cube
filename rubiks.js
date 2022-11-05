@@ -1,15 +1,13 @@
 // Inspiration from https://ruwix.com/online-puzzle-simulators/
-// Potential adaptation of https://html5rubik.com/tutorial/
-
-// Accessing all of the faces from the DOM
-const faces = document.getElementsByClassName("face")
-const cube = document.getElementById("cube")
-const frontFace = document.getElementById("front")
-const backFace = document.getElementById("back")
-const topFace = document.getElementById("top")
-const bottomFace = document.getElementById("bottom")
-const leftFace = document.getElementById("left")
-const rightFace = document.getElementById("right")
+// Accessing all of the elements from the DOM
+const faces = $(".face")
+const cube = $(".cube")[0]
+const frontFace = $("#front")
+const backFace = $("#back")
+const topFace = $("#top")
+const bottomFace = $("#bottom")
+const leftFace = $("#left")
+const rightFace = $("#right")
 
 // Codes representing where to find the color for each sticker on the cube
 // C = Corner, E = Edge, M = Middle
@@ -21,16 +19,80 @@ const topCode = ["C20", "E20", "C10", "E30", "M40", "E10", "C30", "E00", "C00"]
 const bottomCode = ["C70", "E80", "C40", "EB0", "M50", "E90", "C60", "EA0", "C50"]
 const leftCode = ["C22", "E31", "C31", "E61", "M30", "E71", "C61", "EB1", "C72"]
 const rightCode = ["C02", "E11", "C11", "E41", "M10", "E51", "C41", "E91", "C52"]
+const dragCode = {
+    "21front": "u", "20front": "u", "10front": "u",
+    "21right": "u", "20right": "u", "10right": "u",
+    "21left": "u", "20left": "u", "10left": "u",
+    "67back": "u", "68back": "u", "78back": "u",
+    "12front": "U", "02front": "U", "01front": "U",
+    "12right": "U", "02right": "U", "01right": "U",
+    "12left": "U", "02left": "U", "01left": "U",
+    "76back": "U", "86back": "U", "87back": "U",
+
+    "67front": "d", "78front": "d", "68front": "d",
+    "67right": "d", "78right": "d", "68right": "d",
+    "67left": "d", "78left": "d", "68left": "d",
+    "21back": "d", "20back": "d", "10back": "d",
+    "76front": "D", "87front": "D", "86front": "D",
+    "76right": "D", "87right": "D", "86right": "D",
+    "76left": "D", "87left": "D", "86left": "D",
+    "12back": "D", "02back": "D", "01back": "D",
+
+    "25front": "R", "28front": "R", "58front": "R",
+    "25top": "R", "28top": "R", "58top": "R",
+    "25bottom": "R", "28bottom": "R", "58bottom": "R",
+    "25back": "R", "28back": "R", "58back": "R",
+    "52front": "r", "82front": "r", "85front": "r",
+    "52top": "r", "82top": "r", "85top": "r",
+    "52bottom": "r", "82bottom": "r", "85bottom": "r",
+    "52back": "r", "82back": "r", "85back": "r",
+
+    "03front": "l", "06front": "l", "36front": "l",
+    "03top": "l", "06top": "l", "36top": "l",
+    "03bottom": "l", "06bottom": "l", "36bottom": "l",
+    "03back": "l", "06back": "l", "36back": "l",
+    "30front": "L", "60front": "L", "63front": "L",
+    "30top": "L", "60top": "L", "63top": "L",
+    "30bottom": "L", "60bottom": "L", "63bottom": "L",
+    "30back": "L", "60back": "L", "63back": "L",
+
+    "67top": "f", "68top": "f", "78top": "f",
+    "03right": "f", "06right": "f", "36right": "f",
+    "21bottom": "f", "20bottom": "f", "10bottom": "f",
+    "85left": "f", "82left": "f", "52left": "f",
+    "76top": "F", "86top": "F", "87top": "F",
+    "30right": "F", "60right": "F", "63right": "F",
+    "12bottom": "F", "02bottom": "F", "01bottom": "F",
+    "58left": "F", "28left": "F", "25left": "F",
+
+    "21top": "b", "20top": "b", "10top": "b",
+    "85right": "b", "82right": "b", "52right": "b",
+    "67bottom": "b", "68bottom": "b", "78bottom": "b",
+    "03left": "b", "06left": "b", "36left": "b",
+    "12top": "B", "02top": "B", "01top": "B",
+    "58right": "B", "28right": "B", "25right": "B",
+    "76bottom": "B", "86bottom": "B", "87bottom": "B",
+    "30left": "B", "60left": "B", "63left": "B",
+}
 
 let edges = []
 let corners = []
 let centers = []
 
+// Drag-to-turn variables
+let startSticker;
+let endSticker;
+
 // Rotation variables
 const sensitivity = {x: 5, y: 5}
 let mouseDown = false;
+let hovering = false;
 let mouseStartPos, startRotation;
 let rotation = {x: 0, y: 0, z: 0}
+
+let rotationFunction = {x: [0, 90, 0], y: [90, 0, 0], z: [0, 0, 90]}
+
+initializeCube()
 
 function initializeCube() {
     // Create an array of 12 edges (colorless)
@@ -80,15 +142,15 @@ function initializeCube() {
     // Generate blank stickers on each face 
     for (let i = 0; i < faces.length; i++) {
         faces[i].innerHTML = `
-        <div class="sticker none">0</div>
-        <div class="sticker none">1</div>
-        <div class="sticker none">2</div>
-        <div class="sticker none">3</div>
-        <div class="sticker none">4</div>
-        <div class="sticker none">5</div>
-        <div class="sticker none">6</div>
-        <div class="sticker none">7</div>
-        <div class="sticker none">8</div>`
+        <div class="sticker none" id="0${faces[i].id}"></div>
+        <div class="sticker none" id="1${faces[i].id}"></div>
+        <div class="sticker none" id="2${faces[i].id}"></div>
+        <div class="sticker none" id="3${faces[i].id}"></div>
+        <div class="sticker none" id="4${faces[i].id}"></div>
+        <div class="sticker none" id="5${faces[i].id}"></div>
+        <div class="sticker none" id="6${faces[i].id}"></div>
+        <div class="sticker none" id="7${faces[i].id}"></div>
+        <div class="sticker none" id="8${faces[i].id}"></div>`
     }
 
     // Finish setup by assigning colors to each sticker (according to face)
@@ -151,8 +213,8 @@ function renderCube() {
 function renderFace(face, faceCode) {
     for(let i = 0; i < 9; i++) {
         // Reset each sticker's className for repeated calls to renderFace
-        let sticker = face.children.item(i)
-        sticker.className = "sticker "
+        let sticker = face.children().eq(i)
+        sticker.attr("class","sticker")
 
         let code = faceCode[i]
         let index = parseInt(code[1], 16)
@@ -160,22 +222,22 @@ function renderFace(face, faceCode) {
         if(code[0] === "C") {
             // Corners have 3 distinct color values
             if(color === 0) {
-                sticker.className += corners[index].color0
+                sticker.addClass(corners[index].color0)
             } else if(color === 1) {
-                sticker.className += corners[index].color1
+                sticker.addClass(corners[index].color1)
             } else {
-                sticker.className += corners[index].color2
+                sticker.addClass(corners[index].color2)
             }
         } else if(code[0] === "E") {
             // Edges have 2 distinct color values
             if(color === 0) {
-                sticker.className += edges[index].color0
+                sticker.addClass(edges[index].color0)
             } else {
-                sticker.className += edges[index].color1
+                sticker.addClass(edges[index].color1)
             }
         } else {
             // Centers have only 1 color value
-            sticker.className += centers[index].color
+            sticker.addClass(centers[index].color)
         }   
     }
 }
@@ -299,35 +361,72 @@ function B_() {
     rotateCorners(1, 2, 6, 5)
 }
 
+function turn(move) {
+    if(move === "u") {U()}
+    else if(move === "U") {U_()}
+    else if(move === "d") {D()}
+    else if(move === "D") {D_()}
+    else if(move === "l") {L()}
+    else if(move === "L") {L_()}
+    else if(move === "r") {R()}
+    else if(move === "R") {R_()}
+    else if(move === "f") {F()}
+    else if(move === "F") {F_()}
+    else if(move === "b") {B()}
+    else if(move === "B") {B_()}
+    renderCube()
+}
+
 // Turns cube on keydown
 // (u)p, (d)own, (l)eft, (r)ight, (f)ront, (b)ack
 // Press key for clockwise, SHIFT for counter-clockwise
 document.addEventListener("keydown", function(e) {
-    if(e.key === "u") {U()}
-    else if(e.key === "U") {U_()}
-    else if(e.key === "d") {D()}
-    else if(e.key === "D") {D_()}
-    else if(e.key === "l") {L()}
-    else if(e.key === "L") {L_()}
-    else if(e.key === "r") {R()}
-    else if(e.key === "R") {R_()}
-    else if(e.key === "f") {F()}
-    else if(e.key === "F") {F_()}
-    else if(e.key === "b") {B()}
-    else if(e.key === "B") {B_()}
-    else if(e.key === "x") {rotateCube(0,90,0)}
-    else if(e.key === "X") {rotateCube(0,-90,0)}
-    else if(e.key === "y") {rotateCube(90,0,0)}
-    else if(e.key === "Y") {rotateCube(-90,0,0)}
-    else if(e.key === "Z") {rotateCube(0,0,90)}
-    else if(e.key === "z") {rotateCube(0,0,-90)}
+    turn(e.key)
     
-
+    // TODO: Continuity with rotations (x is always x rotation from user perspective)
+    if(e.key === "x") {
+        rotateCube(rotationFunction.x)
+        let temp = rotationFunction.y
+        rotationFunction.y = rotationFunction.z
+        rotationFunction.z = temp.map(function(x) {
+            return -1 * x
+        })
+    }
+    else if(e.key === "X") {
+        rotateCube(rotationFunction.x.map(function(x) {
+            return -1 * x
+        }))
+        let temp = rotationFunction.z
+        rotationFunction.z = rotationFunction.y
+        rotationFunction.y = temp.map(function(x) {
+            return -1 * x
+        })}
+    else if(e.key === "y") {
+        rotateCube(rotationFunction.y)
+        let temp = rotationFunction.z
+        rotationFunction.z = rotationFunction.x
+        rotationFunction.x = temp.map(function(x) {
+            return -1 * x
+        })
+    }
+    else if(e.key === "Y") {rotateCube([-90,0,0])}
+    else if(e.key === "z") {
+        rotateCube(rotationFunction.z)
+        let temp = rotationFunction.x
+        rotationFunction.x = rotationFunction.y
+        rotationFunction.y = temp.map(function(x) {
+            return -1 * x
+        })
+    }
+    else if(e.key === "Z") {rotateCube([0,0,90])}
+    
     // Update the cube after turn
     renderCube()
   })
 
-function rotateCube(dy, dx, dz) {
+  // Updates rotation vector and applies rotation to the cube
+  // TODO: Work with key input reader to provide continuity
+function rotateCube([dy, dx, dz]) {
     rotation.x += dx
     rotation.y += dy
     rotation.z += dz
@@ -340,6 +439,8 @@ function rotateCube(dy, dx, dz) {
     ;`
 }
 
+// Updates/renders the cube when rotation vector is changed manually
+// transition time of 0 because this is called live as the user is dragging the cube
 function updateRotation() {
     cube.style = `
     transition: 0s;
@@ -350,27 +451,70 @@ function updateRotation() {
     ;`
 }
 
-initializeCube()
+// Event listeners for when mouse is hovering over cube
+// Cube cannot be rotated when the mouse is hovering
+cube.addEventListener("mouseover", function() {
+    hovering = true
+})
+cube.addEventListener("mouseout", function() {
+    hovering = false
+})
+
+// Sets initial values for dragging motion
+// Only starts drag rotation when mouse is off cube
 document.onmousedown = function(e) {
-    if(!mouseDown) { 
+    if(!mouseDown && !hovering) { 
         srx = rotation.x
         sry = rotation.y
         mpx = e.pageX
         mpy = e.pageY
         mouseDown = true
-        console.log("updated", mpx)
     }
 }
 document.onmouseup = function() {
-    mouseDown = false;
+    mouseDown = false
 }
 
+// Calculates the angle of rotation for the cube
 document.addEventListener('mousemove', function(e) {
         if(mouseDown) {
             let difference = {x: (e.pageX - mpx) / sensitivity.x, y: (e.pageY - mpy) / sensitivity.y}
-            console.log(difference.x, difference.y)
             rotation.x = (srx + difference.x) % 360
             rotation.y = (sry - difference.y) % 360
             updateRotation()
         }
     })
+    
+// Add 'mouseup' and 'mousedown' event listeners to each sticker
+// This allows tracking of drags (start/end)
+const stickers = $(".face").children()
+for(let i = 0; i < stickers.length; i++) {
+    stickers[i].addEventListener("mousedown", function(e) {
+        startSticker = stickers[i].id
+    })
+    stickers[i].addEventListener("mouseup", function(e) {
+        // If drag started off the cube and ends on a sticker, it is not counted
+        // For now, the only allowed drags are using the same side stickers
+        endSticker = stickers[i].id
+        if(startSticker && startSticker.slice(1) === endSticker.slice(1)) {
+            key = startSticker[0] + endSticker
+            turn(dragCode[key])
+        }
+        startSticker = null
+    })
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
