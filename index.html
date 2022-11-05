@@ -10,6 +10,8 @@
     <link rel="shortcut icon" href="images/logo.png" type="image/x-icon">
 </head>
 <body ondragstart="return false;" ondrop="return false;">
+   
+    
     <div class="scene">
         <div class="cube" id="cube">
             <div class="face" id="front"></div>
@@ -19,6 +21,10 @@
             <div class="face" id="left"></div>
             <div class="face" id="right"></div>
         </div>
+    </div> 
+    <div id="settings">
+        <input type="checkbox" name="transparent" id="transparent" onclick="updateTransparent()">
+        <label for="transparent">Transparent Cube</label>
     </div>
     <script src="rubiks.js"></script>
 </body>

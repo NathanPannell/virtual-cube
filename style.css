@@ -4,19 +4,30 @@
     --med: #5D928D;
     --light: #B4DEE2;
     --white: #FDF9F5;
-    --cube-size: 400px;
+    --cube-size: min(70vw, 50vh);
+    --background: #B4DEE2;
+    --opacity: 100%;
     cursor: grab;
 }
+
+/* :root:has(#clear:checked) {
+    --opacity: 50%;
+    --background: transparent;
+} */
 
 :root:active {
     cursor: grabbing;
 }
 
+
 body {
+    position: relative;
     margin: 0;
     background: var(--black);
-    width: 100%;
+    width: 100vw;
+    height: 100vh;
     display: flex;
+    flex-flow: column nowrap;
     justify-content: center;
     align-items: center;
 }
@@ -41,7 +52,7 @@ body {
     position: absolute;
     width: var(--cube-size);
     aspect-ratio: 1;
-    background-color: var(--light);
+    background-color: var(--background);
 
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
@@ -56,10 +67,28 @@ body {
     justify-content: center;
     align-items: center;
     transition: 0.4s;
+    opacity: var(--opacity);
+}
+
+#settings {
+    width: min(100%, var(--cube-size));
+    margin-top: calc(var(--cube-size) * 0.25);
+    background-color: var(--dark);
+    border-radius: 20px;
+    padding: 20px;
+    cursor: default;
+}
+
+input {
+    cursor: pointer;
 }
 
 .clear .sticker {
     opacity: 50%;
+}
+
+.clear .face {
+    background-color: transparent;
 }
 
 .sticker:hover {
@@ -68,10 +97,6 @@ body {
 
 .sticker:active {
     background-color: pink;
-}
-
-.clear .face {
-    background-color: transparent;
 }
 
 #front { transform: rotateY(0deg) translateZ(calc(var(--cube-size) / 2)); }
@@ -88,3 +113,11 @@ body {
 .white { background-color: #FFFFFF; }
 .yellow { background-color: #FFD500; }
 .none { background-color: transparent; }
+
+@media screen and (max-width: 800px) {
+
+    html, 
+    body {
+        overflow-x: hidden;
+    }
+}

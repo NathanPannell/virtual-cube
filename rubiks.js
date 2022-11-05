@@ -8,6 +8,7 @@ const topFace = $("#top")
 const bottomFace = $("#bottom")
 const leftFace = $("#left")
 const rightFace = $("#right")
+const transparentEl = document.getElementById("transparent")
 
 // Codes representing where to find the color for each sticker on the cube
 // C = Corner, E = Edge, M = Middle
@@ -89,6 +90,7 @@ let mouseDown = false;
 let hovering = false;
 let mouseStartPos, startRotation;
 let rotation = {x: 0, y: 0, z: 0}
+let invertX = false;
 
 let rotationFunction = {x: [0, 90, 0], y: [90, 0, 0], z: [0, 0, 90]}
 
@@ -158,6 +160,8 @@ function initializeCube() {
 
     // Render colored cube
     renderCube()
+    rotateCube([-30,-30,0])
+    updateTransparent()
 }  
 
 // Initializes the colors for each side
@@ -380,6 +384,7 @@ function turn(move) {
 // Turns cube on keydown
 // (u)p, (d)own, (l)eft, (r)ight, (f)ront, (b)ack
 // Press key for clockwise, SHIFT for counter-clockwise
+// TODO: Add slice moves
 document.addEventListener("keydown", function(e) {
     turn(e.key)
     
@@ -469,6 +474,7 @@ document.onmousedown = function(e) {
         mpx = e.pageX
         mpy = e.pageY
         mouseDown = true
+        invertX = (rotation.y % 360 + 360) % 360 <= 90 || (rotation.y % 360 + 360) % 360 > 270
     }
 }
 document.onmouseup = function() {
@@ -479,11 +485,38 @@ document.onmouseup = function() {
 document.addEventListener('mousemove', function(e) {
         if(mouseDown) {
             let difference = {x: (e.pageX - mpx) / sensitivity.x, y: (e.pageY - mpy) / sensitivity.y}
-            rotation.x = (srx + difference.x) % 360
-            rotation.y = (sry - difference.y) % 360
+            rotation.y = (sry - difference.y)
+
+            // When yellow is on top, x is rotated opposite (relative to initial position)
+            if(invertX) {
+                rotation.x = (srx + difference.x) % 360
+            } else {
+                rotation.x = (srx - difference.x) % 360
+            }
+            
             updateRotation()
         }
     })
+
+    // TODO: Enable touch
+// document.addEventListener('mousemove', function(e) {
+//     if(mouseDown) {
+//         let difference = {x: (e.pageX - mpx) / sensitivity.x, y: (e.pageY - mpy) / sensitivity.y}
+//         rotation.y = (sry - difference.y)
+
+//         // When yellow is on top, x is rotated opposite (relative to initial position)
+//         if(invertX) {
+//             rotation.x = (srx + difference.x) % 360
+//         } else {
+//             rotation.x = (srx - difference.x) % 360
+//         }
+        
+//         updateRotation()
+//     }
+// })
+
+
+
     
 // Add 'mouseup' and 'mousedown' event listeners to each sticker
 // This allows tracking of drags (start/end)
@@ -502,9 +535,33 @@ for(let i = 0; i < stickers.length; i++) {
         }
         startSticker = null
     })
+    stickers[i].addEventListener("touchstart", function(e) {
+        startSticker = stickers[i].id
+        console.log(stickers[i].id)
+    })
+    stickers[i].addEventListener("touchcancel", function(e) {
+        startSticker = null
+    })
+    stickers[i].addEventListener("touchend", function(e) {
+        // If drag started off the cube and ends on a sticker, it is not counted
+        // For now, the only allowed drags are using the same side stickers
+        endSticker = stickers[i].id
+        console.log(stickers[i].id)
+        if(startSticker && startSticker.slice(1) === endSticker.slice(1)) {
+            key = startSticker[0] + endSticker
+            turn(dragCode[key])
+        }
+        startSticker = null
+    })
 }
 
-
+function updateTransparent() {
+    if(transparentEl.checked) {
+        $("#cube").addClass("clear")
+    } else {
+        $("#cube").removeClass("clear")
+    }
+}
 
 
 
