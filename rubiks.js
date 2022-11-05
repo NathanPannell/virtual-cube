@@ -9,6 +9,8 @@ const bottomFace = $("#bottom")
 const leftFace = $("#left")
 const rightFace = $("#right")
 const transparentEl = document.getElementById("transparent")
+const darkEl = document.getElementById("dark")
+let isDark, isTransparent
 
 // Codes representing where to find the color for each sticker on the cube
 // C = Corner, E = Edge, M = Middle
@@ -96,6 +98,10 @@ let rotationFunction = {x: [0, 90, 0], y: [90, 0, 0], z: [0, 0, 90]}
 
 initializeCube()
 
+const solvedEdges = JSON.parse(JSON.stringify(edges))
+const solvedCorners = JSON.parse(JSON.stringify(corners))
+const solvedCenters = JSON.parse(JSON.stringify(centers))
+
 function initializeCube() {
     // Create an array of 12 edges (colorless)
     for (let i = 0; i < 12; i++) {
@@ -157,9 +163,14 @@ function initializeCube() {
 
     // Finish setup by assigning colors to each sticker (according to face)
     setColors()
+    transparentEl.checked = JSON.parse(localStorage.getItem("isTransparent"))
+    darkEl.checked = JSON.parse(localStorage.getItem("isDark"))
+    updateDarkMode()
+    updateTransparent()
 
     // Render colored cube
     renderCube()
+    rotation = {x:0,y:0,z:0}
     rotateCube([-30,-30,0])
     updateTransparent()
 }  
@@ -535,36 +546,54 @@ for(let i = 0; i < stickers.length; i++) {
         }
         startSticker = null
     })
+
+    // Mobile responiveness
     stickers[i].addEventListener("touchstart", function(e) {
         startSticker = stickers[i].id
-        console.log(stickers[i].id)
     })
     stickers[i].addEventListener("touchcancel", function(e) {
-        startSticker = null
-    })
-    stickers[i].addEventListener("touchend", function(e) {
-        // If drag started off the cube and ends on a sticker, it is not counted
-        // For now, the only allowed drags are using the same side stickers
-        endSticker = stickers[i].id
-        console.log(stickers[i].id)
-        if(startSticker && startSticker.slice(1) === endSticker.slice(1)) {
-            key = startSticker[0] + endSticker
-            turn(dragCode[key])
-        }
         startSticker = null
     })
 }
 
 function updateTransparent() {
-    if(transparentEl.checked) {
+    isTransparent = transparentEl.checked
+    if(isTransparent) {
         $("#cube").addClass("clear")
     } else {
         $("#cube").removeClass("clear")
     }
+    localStorage.setItem("isTransparent", JSON.stringify(isTransparent))
 }
 
+function updateDarkMode() {
+    isDark = darkEl.checked
+    if(isDark) {
+        $("body").addClass("dark-mode")
+    } else {
+        $("body").removeClass("dark-mode")
+    }
+    localStorage.setItem("isDark", JSON.stringify(isDark))
+}
 
+document.addEventListener("touchend", function(e) {
+    let elem = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY)
+    if(elem.className.includes("sticker")) {
+        endSticker = elem.id
+        if(startSticker && startSticker.slice(1) === endSticker.slice(1)) {
+            key = startSticker[0] + endSticker
+            turn(dragCode[key])
+        }
+        startSticker = null
+    }
+})
 
+function resetCube() {
+    edges = solvedEdges
+    corners = solvedCorners
+    centers = solvedCenters
+    window.location.reload()
+}
 
 
 

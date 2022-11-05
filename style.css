@@ -19,17 +19,20 @@
     cursor: grabbing;
 }
 
-
 body {
     position: relative;
     margin: 0;
-    background: var(--black);
+    background: var(--light);
     width: 100vw;
     height: 100vh;
     display: flex;
     flex-flow: column nowrap;
     justify-content: center;
     align-items: center;
+}
+
+.dark-mode {
+    background-color: var(--black);
 }
 
 .scene {
@@ -52,15 +55,19 @@ body {
     position: absolute;
     width: var(--cube-size);
     aspect-ratio: 1;
-    background-color: var(--background);
+    background-color: var(--black);
 
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: 1fr 1fr 1fr;
 }
 
+.dark-mode .face {
+    background-color: var(--light);
+}
+
 .sticker {
-    border: 3px solid var(--black);
+    border: 3px solid var(--white);
     border-radius: 10px;
     margin: 5px;
     display: flex;
@@ -68,6 +75,10 @@ body {
     align-items: center;
     transition: 0.4s;
     opacity: var(--opacity);
+}
+
+.dark-mode .sticker {
+    border-color: var(--dark);
 }
 
 #settings {
