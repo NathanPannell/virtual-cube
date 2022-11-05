@@ -3,6 +3,7 @@
 
 // Accessing all of the faces from the DOM
 const faces = document.getElementsByClassName("face")
+const cube = document.getElementById("cube")
 const frontFace = document.getElementById("front")
 const backFace = document.getElementById("back")
 const topFace = document.getElementById("top")
@@ -24,6 +25,12 @@ const rightCode = ["C02", "E11", "C11", "E41", "M10", "E51", "C41", "E91", "C52"
 let edges = []
 let corners = []
 let centers = []
+
+// Rotation variables
+const sensitivity = {x: 5, y: 5}
+let mouseDown = false;
+let mouseStartPos, startRotation;
+let rotation = {x: 0, y: 0, z: 0}
 
 function initializeCube() {
     // Create an array of 12 edges (colorless)
@@ -292,7 +299,7 @@ function B_() {
     rotateCorners(1, 2, 6, 5)
 }
 
-// Rotates cube on keydown
+// Turns cube on keydown
 // (u)p, (d)own, (l)eft, (r)ight, (f)ront, (b)ack
 // Press key for clockwise, SHIFT for counter-clockwise
 document.addEventListener("keydown", function(e) {
@@ -308,9 +315,62 @@ document.addEventListener("keydown", function(e) {
     else if(e.key === "F") {F_()}
     else if(e.key === "b") {B()}
     else if(e.key === "B") {B_()}
+    else if(e.key === "x") {rotateCube(0,90,0)}
+    else if(e.key === "X") {rotateCube(0,-90,0)}
+    else if(e.key === "y") {rotateCube(90,0,0)}
+    else if(e.key === "Y") {rotateCube(-90,0,0)}
+    else if(e.key === "Z") {rotateCube(0,0,90)}
+    else if(e.key === "z") {rotateCube(0,0,-90)}
+    
 
     // Update the cube after turn
     renderCube()
-  });
+  })
+
+function rotateCube(dy, dx, dz) {
+    rotation.x += dx
+    rotation.y += dy
+    rotation.z += dz
+    cube.style = `
+    transition: 1s;
+    transform: translateZ(-200px)
+    rotateX(${rotation.y}deg)
+    rotateY(${rotation.x}deg)
+    rotateZ(${rotation.z}deg)
+    ;`
+}
+
+function updateRotation() {
+    cube.style = `
+    transition: 0s;
+    transform: translateZ(-200px)
+    rotateX(${rotation.y}deg)
+    rotateY(${rotation.x}deg)
+    rotateZ(${rotation.z}deg)
+    ;`
+}
 
 initializeCube()
+document.onmousedown = function(e) {
+    if(!mouseDown) { 
+        srx = rotation.x
+        sry = rotation.y
+        mpx = e.pageX
+        mpy = e.pageY
+        mouseDown = true
+        console.log("updated", mpx)
+    }
+}
+document.onmouseup = function() {
+    mouseDown = false;
+}
+
+document.addEventListener('mousemove', function(e) {
+        if(mouseDown) {
+            let difference = {x: (e.pageX - mpx) / sensitivity.x, y: (e.pageY - mpy) / sensitivity.y}
+            console.log(difference.x, difference.y)
+            rotation.x = (srx + difference.x) % 360
+            rotation.y = (sry - difference.y) % 360
+            updateRotation()
+        }
+    })
