@@ -257,6 +257,26 @@ function renderFace(face, faceCode) {
     }
 }
 
+function updateTransparent() {
+    isTransparent = transparentEl.checked
+    if(isTransparent) {
+        $("#cube").addClass("clear")
+    } else {
+        $("#cube").removeClass("clear")
+    }
+    localStorage.setItem("isTransparent", JSON.stringify(isTransparent))
+}
+
+function updateDarkMode() {
+    isDark = darkEl.checked
+    if(isDark) {
+        $("body").addClass("dark-mode")
+    } else {
+        $("body").removeClass("dark-mode")
+    }
+    localStorage.setItem("isDark", JSON.stringify(isDark))
+}
+
 function cycleEdges(a, b, c, d) {
     let temp = edges[a]
     edges[a] = edges[b]
@@ -398,50 +418,9 @@ function turn(move) {
 // TODO: Add slice moves
 document.addEventListener("keydown", function(e) {
     turn(e.key)
-    
-    // TODO: Continuity with rotations (x is always x rotation from user perspective)
-    if(e.key === "x") {
-        rotateCube(rotationFunction.x)
-        let temp = rotationFunction.y
-        rotationFunction.y = rotationFunction.z
-        rotationFunction.z = temp.map(function(x) {
-            return -1 * x
-        })
-    }
-    else if(e.key === "X") {
-        rotateCube(rotationFunction.x.map(function(x) {
-            return -1 * x
-        }))
-        let temp = rotationFunction.z
-        rotationFunction.z = rotationFunction.y
-        rotationFunction.y = temp.map(function(x) {
-            return -1 * x
-        })}
-    else if(e.key === "y") {
-        rotateCube(rotationFunction.y)
-        let temp = rotationFunction.z
-        rotationFunction.z = rotationFunction.x
-        rotationFunction.x = temp.map(function(x) {
-            return -1 * x
-        })
-    }
-    else if(e.key === "Y") {rotateCube([-90,0,0])}
-    else if(e.key === "z") {
-        rotateCube(rotationFunction.z)
-        let temp = rotationFunction.x
-        rotationFunction.x = rotationFunction.y
-        rotationFunction.y = temp.map(function(x) {
-            return -1 * x
-        })
-    }
-    else if(e.key === "Z") {rotateCube([0,0,90])}
-    
-    // Update the cube after turn
-    renderCube()
   })
 
   // Updates rotation vector and applies rotation to the cube
-  // TODO: Work with key input reader to provide continuity
 function rotateCube([dy, dx, dz]) {
     rotation.x += dx
     rotation.y += dy
@@ -467,6 +446,11 @@ function updateRotation() {
     ;`
 }
 
+        // MOVING CUBE WITH MOUSE
+
+
+
+
 // Event listeners for when mouse is hovering over cube
 // Cube cannot be rotated when the mouse is hovering
 cube.addEventListener("mouseover", function() {
@@ -476,25 +460,48 @@ cube.addEventListener("mouseout", function() {
     hovering = false
 })
 
-// Sets initial values for dragging motion
-// Only starts drag rotation when mouse is off cube
-document.onmousedown = function(e) {
-    if(!mouseDown && !hovering) { 
-        srx = rotation.x
-        sry = rotation.y
-        mpx = e.pageX
-        mpy = e.pageY
-        mouseDown = true
-        invertX = (rotation.y % 360 + 360) % 360 <= 90 || (rotation.y % 360 + 360) % 360 > 270
+// Save as above, for mobile
+document.addEventListener("touchstart", function(e) {
+    let elem = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY)
+    if(elem.className.includes("body") || elem.className.includes("scene")) {
+        hovering = false
+    } else {
+        hovering = true
     }
-}
-document.onmouseup = function() {
+})
+
+$(document).bind("mousedown", function(e) {
+    srx = rotation.x
+    sry = rotation.y
+    mpx = e.pageX
+    mpy = e.pageY
+    if(!hovering) {
+        mouseDown = true
+    }
+    invertX = (rotation.y % 360 + 360) % 360 <= 90 || (rotation.y % 360 + 360) % 360 > 270
+})
+
+$(document).bind("touchstart", function(e) {
+    srx = rotation.x
+    sry = rotation.y
+    mpx = e.originalEvent.touches[0].pageX
+    mpy = e.originalEvent.touches[0].pageY
+    console.log(mpx, mpy)
+    if(!hovering) {
+        mouseDown = true
+    }
+    invertX = (rotation.y % 360 + 360) % 360 <= 90 || (rotation.y % 360 + 360) % 360 > 270
+})
+
+$(document).bind("mouseup touchend", function() {
     mouseDown = false
-}
+})
 
 // Calculates the angle of rotation for the cube
-document.addEventListener('mousemove', function(e) {
-        if(mouseDown) {
+$(document).bind('mousemove', function(e) {
+        
+    if(mouseDown) {
+            console.log(e.pointerType)
             let difference = {x: (e.pageX - mpx) / sensitivity.x, y: (e.pageY - mpy) / sensitivity.y}
             rotation.y = (sry - difference.y)
 
@@ -509,27 +516,23 @@ document.addEventListener('mousemove', function(e) {
         }
     })
 
-    // TODO: Enable touch
-// document.addEventListener('mousemove', function(e) {
-//     if(mouseDown) {
-//         let difference = {x: (e.pageX - mpx) / sensitivity.x, y: (e.pageY - mpy) / sensitivity.y}
-//         rotation.y = (sry - difference.y)
+$(document).bind('touchmove', function(e) {
+    e = e.changedTouches[0]
+    if(mouseDown) {
+            let difference = {x: (e.pageX - mpx) / sensitivity.x, y: (e.pageY - mpy) / sensitivity.y}
+            rotation.y = (sry - difference.y)
 
-//         // When yellow is on top, x is rotated opposite (relative to initial position)
-//         if(invertX) {
-//             rotation.x = (srx + difference.x) % 360
-//         } else {
-//             rotation.x = (srx - difference.x) % 360
-//         }
-        
-//         updateRotation()
-//     }
-// })
-
-
-
+            // When yellow is on top, x is rotated opposite (relative to initial position)
+            if(invertX) {
+                rotation.x = (srx + difference.x) % 360
+            } else {
+                rotation.x = (srx - difference.x) % 360
+            }
+            
+            updateRotation()
+        }
+    })
     
-// Add 'mouseup' and 'mousedown' event listeners to each sticker
 // This allows tracking of drags (start/end)
 const stickers = $(".face").children()
 for(let i = 0; i < stickers.length; i++) {
@@ -556,26 +559,9 @@ for(let i = 0; i < stickers.length; i++) {
     })
 }
 
-function updateTransparent() {
-    isTransparent = transparentEl.checked
-    if(isTransparent) {
-        $("#cube").addClass("clear")
-    } else {
-        $("#cube").removeClass("clear")
-    }
-    localStorage.setItem("isTransparent", JSON.stringify(isTransparent))
-}
-
-function updateDarkMode() {
-    isDark = darkEl.checked
-    if(isDark) {
-        $("body").addClass("dark-mode")
-    } else {
-        $("body").removeClass("dark-mode")
-    }
-    localStorage.setItem("isDark", JSON.stringify(isDark))
-}
-
+// Mobile responsiveness (performs twists)
+// Finds the sticker at the point where the touch lifted
+// Performs a move using start and end stickers of drag
 document.addEventListener("touchend", function(e) {
     let elem = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY)
     if(elem.className.includes("sticker")) {
@@ -587,16 +573,6 @@ document.addEventListener("touchend", function(e) {
         startSticker = null
     }
 })
-
-function resetCube() {
-    edges = solvedEdges
-    corners = solvedCorners
-    centers = solvedCenters
-    window.location.reload()
-}
-
-
-
 
 
 

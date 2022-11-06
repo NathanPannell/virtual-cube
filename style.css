@@ -56,6 +56,7 @@ body {
     width: var(--cube-size);
     aspect-ratio: 1;
     background-color: var(--black);
+    padding: 1px;
 
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
@@ -78,7 +79,7 @@ body {
 }
 
 .dark-mode .sticker {
-    border-color: var(--dark);
+    border-color: var(--black);
 }
 
 #settings {
@@ -90,7 +91,8 @@ body {
     cursor: default;
 }
 
-input {
+input,
+button {
     cursor: pointer;
 }
 
