@@ -1,7 +1,7 @@
 :root {
     --black: #121118;
     --dark: #34655D;
-    --med: #5D928D;
+    --med: #343434;
     --light: #B4DEE2;
     --white: #FDF9F5;
     --cube-size: min(70vw, 50vh);
@@ -64,7 +64,7 @@ body {
 }
 
 .dark-mode .face {
-    background-color: var(--light);
+    background-color: var(--med);
 }
 
 .sticker {

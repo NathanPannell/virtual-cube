@@ -76,6 +76,33 @@ const dragCode = {
     "58right": "B", "28right": "B", "25right": "B",
     "76bottom": "B", "86bottom": "B", "87bottom": "B",
     "30left": "B", "60left": "B", "63left": "B",
+
+    "14front": "m", "17front": "m", "47front": "m",
+    "14top": "m", "17top": "m", "47top": "m",
+    "14bott": "m", "17bott": "m", "47bott": "m",
+    "14back": "m", "17back": "m", "47back": "m",
+    "41front": "M", "71front": "M", "74front": "M",
+    "41top": "M", "71top": "M", "74top": "M",
+    "41bott": "M", "71bott": "M", "74bott": "M",
+    "41back": "M", "71back": "M", "74back": "M",
+    
+    "34front": "e", "35front": "e", "45front": "e",
+    "34right": "e", "35right": "e", "45right": "e",
+    "34left": "e", "35left": "e", "45left": "e",
+    "43back": "e", "54back": "e", "53back": "e",
+    "43front": "E", "53front": "E", "54front": "E",
+    "43right": "E", "53right": "E", "54right": "E",
+    "43left": "E", "53left": "E", "54left": "E",
+    "34back": "E", "45back": "E", "35back": "E",
+
+    "34top": "s", "45top": "s", "35top": "s",
+    "14right": "s", "17right": "s", "47right": "s",
+    "54bott": "s", "53bott": "s", "43bott": "s",
+    "74left": "s", "71left": "s", "41left": "s",
+    "43top": "S", "54top": "S", "53top": "S",
+    "41right": "S", "71right": "S", "74right": "S",
+    "45bott": "S", "35bott": "S", "34bott": "S",
+    "47left": "S", "17left": "S", "14left": "S",
 }
 
 let edges = []
@@ -97,10 +124,6 @@ let invertX = false;
 let rotationFunction = {x: [0, 90, 0], y: [90, 0, 0], z: [0, 0, 90]}
 
 initializeCube()
-
-const solvedEdges = JSON.parse(JSON.stringify(edges))
-const solvedCorners = JSON.parse(JSON.stringify(corners))
-const solvedCenters = JSON.parse(JSON.stringify(centers))
 
 function initializeCube() {
     // Create an array of 12 edges (colorless)
@@ -293,6 +316,14 @@ function cycleCorners(a, b, c, d) {
     corners[d] = temp
 }
 
+function cycleCenters(a, b, c, d) {
+    let temp = centers[a]
+    centers[a] = centers[b]
+    centers[b] = centers[c]
+    centers[c] = centers[d]
+    centers[d] = temp
+}
+
 // Rotates corners in place, making them face a different direction
 // Used for left and right turns
 function rotateCorners(a, b, c, d) {
@@ -311,6 +342,43 @@ function rotateEdges(a, b, c, d) {
     edges[d].rotate()
 
 }
+
+function M() {
+    cycleCenters(0, 4, 2, 5)
+    cycleEdges(0, 2, 10, 8)
+    rotateEdges(0, 2, 10, 8)
+}
+
+function M_() {
+    cycleCenters(5, 2, 4, 0)
+    cycleEdges(8, 10, 2, 0)
+    rotateEdges(0, 2, 10, 8)
+}
+
+function E() {
+    cycleCenters(3, 2, 1, 0)
+    cycleEdges(7, 6, 5, 4)
+    rotateEdges(7, 6, 5, 4)
+}
+
+function E_() {
+    cycleCenters(0, 1, 2, 3)
+    cycleEdges(4, 5, 6, 7)
+    rotateEdges(7, 6, 5, 4)
+}
+
+function S() {
+    cycleCenters(1, 4, 3, 5)
+    cycleEdges(1, 3, 11, 9)
+    rotateEdges(1, 3, 11, 9)
+}
+
+function S_() {
+    cycleCenters(5, 3, 4, 1)
+    cycleEdges(9, 11, 3, 1)
+    rotateEdges(1, 3, 11, 9)
+}
+
 
 // Turns top face clockwise
 function U() {
@@ -409,6 +477,12 @@ function turn(move) {
     else if(move === "F") {F_()}
     else if(move === "b") {B()}
     else if(move === "B") {B_()}
+    else if(move === "m") {M()}
+    else if(move === "M") {M_()}
+    else if(move === "e") {E()}
+    else if(move === "E") {E_()}
+    else if(move === "s") {S()}
+    else if(move === "S") {S_()}
     renderCube()
 }
 
@@ -486,7 +560,6 @@ $(document).bind("touchstart", function(e) {
     sry = rotation.y
     mpx = e.originalEvent.touches[0].pageX
     mpy = e.originalEvent.touches[0].pageY
-    console.log(mpx, mpy)
     if(!hovering) {
         mouseDown = true
     }
@@ -501,7 +574,6 @@ $(document).bind("mouseup touchend", function() {
 $(document).bind('mousemove', function(e) {
         
     if(mouseDown) {
-            console.log(e.pointerType)
             let difference = {x: (e.pageX - mpx) / sensitivity.x, y: (e.pageY - mpy) / sensitivity.y}
             rotation.y = (sry - difference.y)
 
@@ -573,6 +645,10 @@ document.addEventListener("touchend", function(e) {
         startSticker = null
     }
 })
+
+function resetCube() {
+    window.location.reload()
+}
 
 
 
