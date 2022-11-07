@@ -4,35 +4,28 @@
     --med: #343434;
     --light: #B4DEE2;
     --white: #FDF9F5;
-    --cube-size: min(70vw, 50vh);
-    --background: #B4DEE2;
-    --opacity: 100%;
+    --cube-size: min(60vw, 50vh);
     cursor: grab;
 }
-
-/* :root:has(#clear:checked) {
-    --opacity: 50%;
-    --background: transparent;
-} */
-
 :root:active {
     cursor: grabbing;
 }
 
+html,
 body {
-    position: relative;
-    margin: 0;
-    background: var(--light);
     width: 100vw;
     height: 100vh;
+    margin: 0;
+}
+body {
+    background: var(--light);
+
+    /* Stacking elements vertically for now
+        Mobile First! */
     display: flex;
     flex-flow: column nowrap;
     justify-content: center;
     align-items: center;
-}
-
-.dark-mode {
-    background-color: var(--black);
 }
 
 .scene {
@@ -56,34 +49,25 @@ body {
     width: var(--cube-size);
     aspect-ratio: 1;
     background-color: var(--black);
-    border-radius: 15px;
+    border-radius: 16px;
     padding: 1px;
-
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr 1fr;
-}
-
-.dark-mode .face {
-    background-color: var(--med);
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
 }
 
 .sticker {
     border: 3px solid var(--white);
     border-radius: 10px;
-    margin: 5px;
     display: flex;
+    margin: 4%;
     justify-content: center;
     align-items: center;
     transition: 0.4s;
-    opacity: var(--opacity);
     backface-visibility: hidden;
 }
 
-.dark-mode .sticker {
-    border-color: var(--black);
-}
-
+/* Setting module (change theme, etc.) */
 #settings {
     width: min(100%, var(--cube-size));
     margin-top: calc(var(--cube-size) * 0.25);
@@ -92,29 +76,41 @@ body {
     padding: 20px;
     cursor: default;
 }
-
 input,
 button {
     cursor: pointer;
 }
 
-.clear .sticker {
-    opacity: 50%;
+/* Change appearence of the cube for the dark theme */
+.dark-mode .face {
+    background-color: var(--med);
+}
+.dark-mode .sticker {
+    border-color: var(--black);
+}
+.dark-mode.body {
+    background-color: var(--black);
 }
 
+/* Change appearance of the cube for the transparent theme */
+.clear .sticker {
+    opacity: 75%;
+}
 .clear .face {
     background-color: transparent;
     border: none;
 }
 
-.sticker:hover {
-    opacity: 70%;
-}
-
+/* Responsiveness for stickers */
+.sticker:hover,
 .sticker:active {
-    margin: 10%;
+    opacity: 50%;
+}
+.sticker:active {
+    margin: 5%;
 }
 
+/* Positions the faces of the cube in 3D */
 #front { transform: rotateY(0deg) translateZ(calc(var(--cube-size) / 2)); }
 #back { transform: rotateY(180deg) rotateZ(180deg) translateZ(calc(var(--cube-size) / 2)); }
 #top { transform: rotateX(90deg) translateZ(calc(var(--cube-size) / 2)); }
@@ -122,6 +118,7 @@ button {
 #left { transform: rotateY(-90deg) translateZ(calc(var(--cube-size) / 2)); }
 #right { transform: rotateY(90deg) translateZ(calc(var(--cube-size) / 2)); }
 
+/* Utility classes for sticker colors */
 .green { background-color: #009B48; }
 .red { background-color: #B90000; }
 .blue { background-color: #0045AD; }
@@ -130,10 +127,12 @@ button {
 .yellow { background-color: #FFD500; }
 .none { background-color: transparent; }
 
+/* Prevents screen from growing outside of screen size.
+    Should prevent scrolling on mobile.
+    TODO: Check out options to prevent scrolling on iOS */
 @media screen and (max-width: 800px) {
-
     html, 
     body {
-        overflow-x: hidden;
+        overflow: hidden;
     }
 }

@@ -1,27 +1,31 @@
 // Inspiration from https://ruwix.com/online-puzzle-simulators/
-// Accessing all of the elements from the DOM
+
 const faces = $(".face")
-const cube = $(".cube")[0]
+const cube = $(".cube")[0] // JQuery is very annoying for what I need to do with this element
 const frontFace = $("#front")
 const backFace = $("#back")
 const topFace = $("#top")
 const bottomFace = $("#bottom")
 const leftFace = $("#left")
 const rightFace = $("#right")
-const transparentEl = document.getElementById("transparent")
-const darkEl = document.getElementById("dark")
+const transparentEl = $("#transparent")
+const darkEl = $("#dark")
 let isDark, isTransparent
 
-// Codes representing where to find the color for each sticker on the cube
+// Mapping of piece objects to colored stickers
 // C = Corner, E = Edge, M = Middle
-// First number is the index of the respective array (Ex. edges[2])
-// Second number is the color number (for corner and edge pieces who have more than one side)
+// Read: "<type><index in array><side of piece>"
 const frontCode = ["C32", "E01", "C01", "E70", "M00", "E40", "C71", "E81", "C42"]
 const backCode = ["C62", "EA1", "C51", "E60", "M20", "E50", "C21", "E21", "C12"]
 const topCode = ["C20", "E20", "C10", "E30", "M40", "E10", "C30", "E00", "C00"]
 const bottomCode = ["C70", "E80", "C40", "EB0", "M50", "E90", "C60", "EA0", "C50"]
 const leftCode = ["C22", "E31", "C31", "E61", "M30", "E71", "C61", "EB1", "C72"]
 const rightCode = ["C02", "E11", "C11", "E41", "M10", "E51", "C41", "E91", "C52"]
+
+// Mapping of piece combinations to twists
+// Read: "<start sticker id #><end sticker id #><face>"
+// At the moment, only moves along one face are possible
+// TODO: Add codes for moves across faces
 const dragCode = {
     "21front": "u", "20front": "u", "10front": "u",
     "21right": "u", "20right": "u", "10right": "u",
@@ -105,6 +109,7 @@ const dragCode = {
     "47left": "S", "17left": "S", "14left": "S",
 }
 
+// Cube data (pieces are stored)
 let edges = []
 let corners = []
 let centers = []
@@ -117,11 +122,8 @@ let endSticker;
 const sensitivity = {x: 5, y: 5}
 let mouseDown = false;
 let hovering = false;
-let mouseStartPos, startRotation;
 let rotation = {x: 0, y: 0, z: 0}
 let invertX = false;
-
-let rotationFunction = {x: [0, 90, 0], y: [90, 0, 0], z: [0, 0, 90]}
 
 initializeCube()
 
@@ -186,16 +188,18 @@ function initializeCube() {
 
     // Finish setup by assigning colors to each sticker (according to face)
     setColors()
-    transparentEl.checked = JSON.parse(localStorage.getItem("isTransparent"))
-    darkEl.checked = JSON.parse(localStorage.getItem("isDark"))
+
+    // Updating transparent/dark themes by pulling from local storage
+    transparentEl.prop("checked", JSON.parse(localStorage.getItem("isTransparent")))
+    darkEl.prop("checked", JSON.parse(localStorage.getItem("isDark")))
     updateDarkMode()
     updateTransparent()
 
     // Render colored cube
     renderCube()
-    rotation = {x:0,y:0,z:0}
-    rotateCube([-30,-30,0])
-    updateTransparent()
+
+    // Cube rotates into 3D on page load
+    rotateCube([-30,-30, 0])
 }  
 
 // Initializes the colors for each side
@@ -211,27 +215,14 @@ function setColors() {
 // Accesses elements from centers, edges, or corners and sets to <colorName>
 function setFace(faceCode, colorName) {
     for(let i = 0; i < 9; i++) {
-        let code = faceCode[i]
-        let index = parseInt(code[1], 16)
-        let color = parseInt(code[2])
-        if(code[0] === "C") {
-            // Corners have 3 distinct color values
-            if(color === 0) {
-                corners[index].color0 = colorName
-            } else if(color === 1) {
-                corners[index].color1 = colorName
-            } else {
-                corners[index].color2 = colorName
-            }
-        } else if(code[0] === "E") {
-            // Edges have 2 distinct color values
-            if(color === 0) {
-                edges[index].color0 = colorName
-            } else {
-                edges[index].color1 = colorName
-            }
+        let type = faceCode[i][0]
+        let index = parseInt(faceCode[i][1], 16)
+        let color = parseInt(faceCode[i][2])
+        if(type === "C") {
+            corners[index]["color" + color] = colorName
+        } else if(type === "E") {
+            edges[index]["color" + color] = colorName
         } else {
-            // Centers have only 1 color value
             centers[index].color = colorName
         }   
     }
@@ -254,34 +245,21 @@ function renderFace(face, faceCode) {
         let sticker = face.children().eq(i)
         sticker.attr("class","sticker")
 
-        let code = faceCode[i]
-        let index = parseInt(code[1], 16)
-        let color = parseInt(code[2])
-        if(code[0] === "C") {
-            // Corners have 3 distinct color values
-            if(color === 0) {
-                sticker.addClass(corners[index].color0)
-            } else if(color === 1) {
-                sticker.addClass(corners[index].color1)
-            } else {
-                sticker.addClass(corners[index].color2)
-            }
-        } else if(code[0] === "E") {
-            // Edges have 2 distinct color values
-            if(color === 0) {
-                sticker.addClass(edges[index].color0)
-            } else {
-                sticker.addClass(edges[index].color1)
-            }
+        let type = faceCode[i][0]
+        let index = parseInt(faceCode[i][1], 16)
+        let color = parseInt(faceCode[i][2])
+        if(type === "C") {
+            sticker.addClass(corners[index]["color" + color])
+        } else if(type === "E") {
+            sticker.addClass(edges[index]["color" + color])
         } else {
-            // Centers have only 1 color value
             sticker.addClass(centers[index].color)
         }   
     }
 }
 
 function updateTransparent() {
-    isTransparent = transparentEl.checked
+    isTransparent = transparentEl.prop("checked")
     if(isTransparent) {
         $("#cube").addClass("clear")
     } else {
@@ -291,7 +269,7 @@ function updateTransparent() {
 }
 
 function updateDarkMode() {
-    isDark = darkEl.checked
+    isDark = darkEl.prop("checked")
     if(isDark) {
         $("body").addClass("dark-mode")
     } else {
@@ -300,29 +278,21 @@ function updateDarkMode() {
     localStorage.setItem("isDark", JSON.stringify(isDark))
 }
 
-function cycleEdges(a, b, c, d) {
-    let temp = edges[a]
-    edges[a] = edges[b]
-    edges[b] = edges[c]
-    edges[c] = edges[d]
-    edges[d] = temp
+function resetCube() {
+    window.location.reload()
 }
 
-function cycleCorners(a, b, c, d) {
-    let temp = corners[a]
-    corners[a] = corners[b]
-    corners[b] = corners[c]
-    corners[c] = corners[d]
-    corners[d] = temp
+function cyclePieces(arr, a, b, c, d) {
+    let temp = arr[a]
+    arr[a] = arr[b]
+    arr[b] = arr[c]
+    arr[c] = arr[d]
+    arr[d] = temp
 }
 
-function cycleCenters(a, b, c, d) {
-    let temp = centers[a]
-    centers[a] = centers[b]
-    centers[b] = centers[c]
-    centers[c] = centers[d]
-    centers[d] = temp
-}
+function cycleEdges(a, b, c, d) { cyclePieces(edges, a, b, c, d) }
+function cycleCorners(a, b, c, d) { cyclePieces(corners, a, b, c, d) }
+function cycleCenters(a, b, c, d) { cyclePieces(centers, a, b, c, d) }
 
 // Rotates corners in place, making them face a different direction
 // Used for left and right turns
@@ -340,11 +310,10 @@ function rotateEdges(a, b, c, d) {
     edges[b].rotate()
     edges[c].rotate()
     edges[d].rotate()
-
 }
 
 function M() {
-    cycleCenters(0, 4, 2, 5)
+    cycleCenters(0, 4, 2, 5) 
     cycleEdges(0, 2, 10, 8)
     rotateEdges(0, 2, 10, 8)
 }
@@ -379,60 +348,50 @@ function S_() {
     rotateEdges(1, 3, 11, 9)
 }
 
-
-// Turns top face clockwise
 function U() {
     cycleEdges(0, 1, 2, 3)
     cycleCorners(0, 1, 2, 3)
 }
 
-// Turns top face counter-clockwise
 function U_() {
     cycleEdges(3, 2, 1, 0)
     cycleCorners(3, 2, 1, 0)
 }
 
-// Turns bottom face clockwise
 function D() {
     cycleEdges(11, 10, 9, 8)
     cycleCorners(7, 6, 5, 4)
 }
 
-// Turns bottom face counter-clockwise
 function D_() {
     cycleEdges(8, 9, 10, 11)
     cycleCorners(4, 5, 6, 7)
 }
 
-// Turns right face clockwise
 function R() {
     cycleEdges(4, 9, 5, 1)
     cycleCorners(4, 5, 1, 0)
     rotateCorners(0, 1, 5, 4)
 }
 
-// Turns right face counter-clockwise
 function R_() {
     cycleEdges(1, 5, 9, 4)
     cycleCorners(0, 1, 5, 4)
     rotateCorners(0, 1, 5, 4)
 }
 
-// Turns left face clockwise
 function L() {
     cycleEdges(6, 11, 7, 3)
     cycleCorners(6, 7, 3, 2)
     rotateCorners(2, 3, 7, 6)
 }
 
-// Turns left face counter-clockwise
 function L_() {
     cycleEdges(3, 7, 11, 6)
     cycleCorners(2, 3, 7, 6)
     rotateCorners(2, 3, 7, 6)
 }
 
-// Turns front face clockwise
 function F() {
     cycleEdges(7, 8, 4, 0)
     rotateEdges(0, 4, 8, 7)
@@ -440,7 +399,6 @@ function F() {
     rotateCorners(3, 0, 4, 7)
 }
 
-// Turns front face counter-clockwise
 function F_() {
     cycleEdges(0, 4, 8, 7)
     rotateEdges(0, 4, 8, 7)
@@ -448,7 +406,6 @@ function F_() {
     rotateCorners(3, 0, 4, 7)
 }
 
-// Turns back face clockwise
 function B() {
     cycleEdges(5, 10, 6, 2)
     rotateEdges(2, 6, 10, 5)
@@ -456,7 +413,6 @@ function B() {
     rotateCorners(1, 2, 6, 5)
 }
 
-// Turns back face counter-clockwise
 function B_() {
     cycleEdges(2, 6, 10, 5)
     rotateEdges(2, 6, 10, 5)
@@ -465,53 +421,47 @@ function B_() {
 }
 
 function turn(move) {
-    if(move === "u") {U()}
-    else if(move === "U") {U_()}
-    else if(move === "d") {D()}
-    else if(move === "D") {D_()}
-    else if(move === "l") {L()}
-    else if(move === "L") {L_()}
-    else if(move === "r") {R()}
-    else if(move === "R") {R_()}
-    else if(move === "f") {F()}
-    else if(move === "F") {F_()}
-    else if(move === "b") {B()}
-    else if(move === "B") {B_()}
-    else if(move === "m") {M()}
-    else if(move === "M") {M_()}
-    else if(move === "e") {E()}
-    else if(move === "E") {E_()}
-    else if(move === "s") {S()}
-    else if(move === "S") {S_()}
+    if(move === "u") { U() }
+    else if(move === "U") { U_() }
+    else if(move === "d") { D() }
+    else if(move === "D") { D_() }
+    else if(move === "l") { L() }
+    else if(move === "L") { L_() }
+    else if(move === "r") { R() }
+    else if(move === "R") { R_() }
+    else if(move === "f") { F() }
+    else if(move === "F") { F_() }
+    else if(move === "b") { B() }
+    else if(move === "B") { B_() }
+    else if(move === "m") { M() }
+    else if(move === "M") { M_() }
+    else if(move === "e") { E() }
+    else if(move === "E") { E_() }
+    else if(move === "s") { S() }
+    else if(move === "S") { S_() }
     renderCube()
 }
 
-// Turns cube on keydown
-// (u)p, (d)own, (l)eft, (r)ight, (f)ront, (b)ack, (m)iddle, (e)quator, (s)lice
+// Turns cube on keypress
+// (u)p, (d)own, (l)eft, (r)ight, 
+// (f)ront, (b)ack, (m)iddle, (e)quator, (s)lice
 // Press key for clockwise, SHIFT for counter-clockwise
 document.addEventListener("keydown", function(e) {
     turn(e.key)
-  })
+})
 
-  // Updates rotation vector and applies rotation to the cube
+// Applies rotation to cube with transition
 function rotateCube([dy, dx, dz]) {
     rotation.x += dx
     rotation.y += dy
     rotation.z += dz
-    cube.style = `
-    transition: 1s;
-    transform: translateZ(-200px)
-    rotateX(${rotation.y}deg)
-    rotateY(${rotation.x}deg)
-    rotateZ(${rotation.z}deg)
-    ;`
+    updateRotation(1)
 }
 
 // Updates/renders the cube when rotation vector is changed manually
-// transition time of 0 because this is called live as the user is dragging the cube
-function updateRotation() {
+function updateRotation(time) {
     cube.style = `
-    transition: 0s;
+    transition: ${time}s;
     transform: translateZ(-200px)
     rotateX(${rotation.y}deg)
     rotateY(${rotation.x}deg)
@@ -519,12 +469,6 @@ function updateRotation() {
     ;`
 }
 
-        // MOVING CUBE WITH MOUSE
-
-
-
-
-// Event listeners for when mouse is hovering over cube
 // Cube cannot be rotated when the mouse is hovering
 cube.addEventListener("mouseover", function() {
     hovering = true
@@ -533,78 +477,55 @@ cube.addEventListener("mouseout", function() {
     hovering = false
 })
 
-// Save as above, for mobile
-document.addEventListener("touchstart", function(e) {
-    let elem = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY)
-    if(elem.className.includes("body") || elem.className.includes("scene")) {
-        hovering = false
-    } else {
-        hovering = true
-    }
-})
-
+// Records initial condition of cube at start of rotation
 $(document).bind("mousedown", function(e) {
     srx = rotation.x
     sry = rotation.y
     srz = rotation.z
     mpx = e.pageX
     mpy = e.pageY
-    if(!hovering) {
-        mouseDown = true
-    }
+    mouseDown = !hovering
     invertX = (rotation.y % 360 + 360) % 360
 })
 
+// For Mobile
 $(document).bind("touchstart", function(e) {
+    let elem = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY)
+    mouseDown = elem.className.includes("body") || elem.className.includes("scene")
     srx = rotation.x
     sry = rotation.y
     srz = rotation.z
     mpx = e.originalEvent.touches[0].pageX
     mpy = e.originalEvent.touches[0].pageY
-    if(!hovering) {
-        mouseDown = true
-    }
     invertX = (rotation.y % 360 + 360) % 360
 })
-
 $(document).bind("mouseup touchend", function() {
     mouseDown = false
 })
 
 // Calculates the angle of rotation for the cube
-$(document).bind('mousemove', function(e) {
+// TODO: More comprehensive rotation inversion (different color on top, not just white or yellow)
+function move(e) {
+    if(mouseDown) {
+        let difference = {x: (e.pageX - mpx) / sensitivity.x, y: (e.pageY - mpy) / sensitivity.y}
         
-    if(mouseDown) {
-            let difference = {x: (e.pageX - mpx) / sensitivity.x, y: (e.pageY - mpy) / sensitivity.y}
-            rotation.y = (sry - difference.y)
-
-            // When yellow is on top, x is rotated opposite (relative to initial position)
-            if(invertX < 90 || invertX > 270) {
-                rotation.x = (srx + difference.x) % 360
-            } else {
-                rotation.x = (srx - difference.x) % 360
-            }
-            
-            updateRotation()
+        // When yellow is on top, x is rotated opposite (relative to initial position)
+        if(invertX < 90 || invertX > 270) {
+            rotation.x = (srx + difference.x) % 360
+        } else {
+            rotation.x = (srx - difference.x) % 360
         }
-    })
+        rotation.y = (sry - difference.y)
+        updateRotation(0)
+    }
+}
 
+$(document).bind('mousemove', function(e) {
+    move(e)
+})
 $(document).bind('touchmove', function(e) {
-    e = e.changedTouches[0]
-    if(mouseDown) {
-            let difference = {x: (e.pageX - mpx) / sensitivity.x, y: (e.pageY - mpy) / sensitivity.y}
-            rotation.y = (sry - difference.y)
-
-            // When yellow is on top, x is rotated opposite (relative to initial position)
-            if(invertX < 90 || invertX > 270) {
-                rotation.x = (srx + difference.x) % 360
-            } else {
-                rotation.x = (srx - difference.x) % 360
-            }
-            
-            updateRotation()
-        }
-    })
+    move(e.changedTouches[0])
+})
     
 // This allows tracking of drags (start/end)
 const stickers = $(".face").children()
@@ -613,17 +534,10 @@ for(let i = 0; i < stickers.length; i++) {
         startSticker = stickers[i].id
     })
     stickers[i].addEventListener("mouseup", function(e) {
-        // If drag started off the cube and ends on a sticker, it is not counted
-        // For now, the only allowed drags are using the same side stickers
-        endSticker = stickers[i].id
-        if(startSticker && startSticker.slice(1) === endSticker.slice(1)) {
-            key = startSticker[0] + endSticker
-            turn(dragCode[key])
-        }
-        startSticker = null
+        faceTurn(stickers[i].id)
     })
 
-    // Mobile responiveness
+    // More Mobile 😖
     stickers[i].addEventListener("touchstart", function(e) {
         startSticker = stickers[i].id
     })
@@ -632,28 +546,19 @@ for(let i = 0; i < stickers.length; i++) {
     })
 }
 
-// Mobile responsiveness (performs twists)
-// Finds the sticker at the point where the touch lifted
-// Performs a move using start and end stickers of drag
 document.addEventListener("touchend", function(e) {
     let elem = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY)
     if(elem.className.includes("sticker")) {
-        endSticker = elem.id
+        faceTurn(elem.id)
+    }
+})
+
+// Performs twist depending on start/end stickers of drag
+function faceTurn(endID) {
+    endSticker = end
         if(startSticker && startSticker.slice(1) === endSticker.slice(1)) {
             key = startSticker[0] + endSticker
             turn(dragCode[key])
         }
         startSticker = null
-    }
-})
-
-function resetCube() {
-    window.location.reload()
 }
-
-
-
-
-
-
-
