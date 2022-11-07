@@ -5,7 +5,7 @@ const cube = $(".cube")[0]
 const frontFace = $("#front")
 const backFace = $("#back")
 const topFace = $("#top")
-const bottomomFace = $("#bottomom")
+const bottomFace = $("#bottom")
 const leftFace = $("#left")
 const rightFace = $("#right")
 const transparentEl = document.getElementById("transparent")
@@ -19,7 +19,7 @@ let isDark, isTransparent
 const frontCode = ["C32", "E01", "C01", "E70", "M00", "E40", "C71", "E81", "C42"]
 const backCode = ["C62", "EA1", "C51", "E60", "M20", "E50", "C21", "E21", "C12"]
 const topCode = ["C20", "E20", "C10", "E30", "M40", "E10", "C30", "E00", "C00"]
-const bottomomCode = ["C70", "E80", "C40", "EB0", "M50", "E90", "C60", "EA0", "C50"]
+const bottomCode = ["C70", "E80", "C40", "EB0", "M50", "E90", "C60", "EA0", "C50"]
 const leftCode = ["C22", "E31", "C31", "E61", "M30", "E71", "C61", "EB1", "C72"]
 const rightCode = ["C02", "E11", "C11", "E41", "M10", "E51", "C41", "E91", "C52"]
 const dragCode = {
@@ -43,38 +43,38 @@ const dragCode = {
 
     "25front": "R", "28front": "R", "58front": "R",
     "25top": "R", "28top": "R", "58top": "R",
-    "25bottomom": "R", "28bottomom": "R", "58bottomom": "R",
+    "25bottom": "R", "28bottom": "R", "58bottom": "R",
     "25back": "R", "28back": "R", "58back": "R",
     "52front": "r", "82front": "r", "85front": "r",
     "52top": "r", "82top": "r", "85top": "r",
-    "52bottomom": "r", "82bottomom": "r", "85bottomom": "r",
+    "52bottom": "r", "82bottom": "r", "85bottom": "r",
     "52back": "r", "82back": "r", "85back": "r",
 
     "03front": "l", "06front": "l", "36front": "l",
     "03top": "l", "06top": "l", "36top": "l",
-    "03bottomom": "l", "06bottomom": "l", "36bottomom": "l",
+    "03bottom": "l", "06bottom": "l", "36bottom": "l",
     "03back": "l", "06back": "l", "36back": "l",
     "30front": "L", "60front": "L", "63front": "L",
     "30top": "L", "60top": "L", "63top": "L",
-    "30bottomom": "L", "60bottomom": "L", "63bottomom": "L",
+    "30bottom": "L", "60bottom": "L", "63bottom": "L",
     "30back": "L", "60back": "L", "63back": "L",
 
     "67top": "f", "68top": "f", "78top": "f",
     "03right": "f", "06right": "f", "36right": "f",
-    "21bottomom": "f", "20bottomom": "f", "10bottomom": "f",
+    "21bottom": "f", "20bottom": "f", "10bottom": "f",
     "85left": "f", "82left": "f", "52left": "f",
     "76top": "F", "86top": "F", "87top": "F",
     "30right": "F", "60right": "F", "63right": "F",
-    "12bottomom": "F", "02bottomom": "F", "01bottomom": "F",
+    "12bottom": "F", "02bottom": "F", "01bottom": "F",
     "58left": "F", "28left": "F", "25left": "F",
 
     "21top": "b", "20top": "b", "10top": "b",
     "85right": "b", "82right": "b", "52right": "b",
-    "67bottomom": "b", "68bottomom": "b", "78bottomom": "b",
+    "67bottom": "b", "68bottom": "b", "78bottom": "b",
     "03left": "b", "06left": "b", "36left": "b",
     "12top": "B", "02top": "B", "01top": "B",
     "58right": "B", "28right": "B", "25right": "B",
-    "76bottomom": "B", "86bottomom": "B", "87bottomom": "B",
+    "76bottom": "B", "86bottom": "B", "87bottom": "B",
     "30left": "B", "60left": "B", "63left": "B",
 
     "14front": "m", "17front": "m", "47front": "m",
@@ -203,7 +203,7 @@ function setColors() {
     setFace(frontCode, "green")
     setFace(backCode, "blue")
     setFace(topCode, "white")
-    setFace(bottomomCode, "yellow")
+    setFace(bottomCode, "yellow")
     setFace(leftCode, "orange")
     setFace(rightCode, "red")
 }
@@ -242,7 +242,7 @@ function renderCube() {
     renderFace(frontFace, frontCode)
     renderFace(backFace, backCode)
     renderFace(topFace, topCode)
-    renderFace(bottomomFace, bottomomCode)
+    renderFace(bottomFace, bottomCode)
     renderFace(leftFace, leftCode)
     renderFace(rightFace, rightCode)
 }
@@ -392,13 +392,13 @@ function U_() {
     cycleCorners(3, 2, 1, 0)
 }
 
-// Turns bottomom face clockwise
+// Turns bottom face clockwise
 function D() {
     cycleEdges(11, 10, 9, 8)
     cycleCorners(7, 6, 5, 4)
 }
 
-// Turns bottomom face counter-clockwise
+// Turns bottom face counter-clockwise
 function D_() {
     cycleEdges(8, 9, 10, 11)
     cycleCorners(4, 5, 6, 7)
