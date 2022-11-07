@@ -534,7 +534,14 @@ for(let i = 0; i < stickers.length; i++) {
         startSticker = stickers[i].id
     })
     stickers[i].addEventListener("mouseup", function(e) {
-        faceTurn(stickers[i].id)
+        // If drag started off the cube and ends on a sticker, it is not counted
+        // For now, the only allowed drags are using the same side stickers
+        endSticker = stickers[i].id
+        if(startSticker && startSticker.slice(1) === endSticker.slice(1)) {
+            key = startSticker[0] + endSticker
+            turn(dragCode[key])
+        }
+        startSticker = null
     })
 
     // More Mobile 😖
@@ -546,19 +553,18 @@ for(let i = 0; i < stickers.length; i++) {
     })
 }
 
+
+// Mobile responsiveness (performs twists)
+// Finds the sticker at the point where the touch lifted
+// Performs a move using start and end stickers of drag
 document.addEventListener("touchend", function(e) {
     let elem = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY)
     if(elem.className.includes("sticker")) {
-        faceTurn(elem.id)
-    }
-})
-
-// Performs twist depending on start/end stickers of drag
-function faceTurn(endID) {
-    endSticker = end
+        endSticker = elem.id
         if(startSticker && startSticker.slice(1) === endSticker.slice(1)) {
             key = startSticker[0] + endSticker
             turn(dragCode[key])
         }
         startSticker = null
-}
+    }
+})
