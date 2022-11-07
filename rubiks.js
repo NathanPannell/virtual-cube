@@ -487,9 +487,8 @@ function turn(move) {
 }
 
 // Turns cube on keydown
-// (u)p, (d)own, (l)eft, (r)ight, (f)ront, (b)ack
+// (u)p, (d)own, (l)eft, (r)ight, (f)ront, (b)ack, (m)iddle, (e)quator, (s)lice
 // Press key for clockwise, SHIFT for counter-clockwise
-// TODO: Add slice moves
 document.addEventListener("keydown", function(e) {
     turn(e.key)
   })
@@ -547,23 +546,25 @@ document.addEventListener("touchstart", function(e) {
 $(document).bind("mousedown", function(e) {
     srx = rotation.x
     sry = rotation.y
+    srz = rotation.z
     mpx = e.pageX
     mpy = e.pageY
     if(!hovering) {
         mouseDown = true
     }
-    invertX = (rotation.y % 360 + 360) % 360 <= 90 || (rotation.y % 360 + 360) % 360 > 270
+    invertX = (rotation.y % 360 + 360) % 360
 })
 
 $(document).bind("touchstart", function(e) {
     srx = rotation.x
     sry = rotation.y
+    srz = rotation.z
     mpx = e.originalEvent.touches[0].pageX
     mpy = e.originalEvent.touches[0].pageY
     if(!hovering) {
         mouseDown = true
     }
-    invertX = (rotation.y % 360 + 360) % 360 <= 90 || (rotation.y % 360 + 360) % 360 > 270
+    invertX = (rotation.y % 360 + 360) % 360
 })
 
 $(document).bind("mouseup touchend", function() {
@@ -578,7 +579,7 @@ $(document).bind('mousemove', function(e) {
             rotation.y = (sry - difference.y)
 
             // When yellow is on top, x is rotated opposite (relative to initial position)
-            if(invertX) {
+            if(invertX < 90 || invertX > 270) {
                 rotation.x = (srx + difference.x) % 360
             } else {
                 rotation.x = (srx - difference.x) % 360
