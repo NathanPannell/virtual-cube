@@ -596,7 +596,7 @@ $(document).bind('touchmove', function(e) {
             rotation.y = (sry - difference.y)
 
             // When yellow is on top, x is rotated opposite (relative to initial position)
-            if(invertX) {
+            if(invertX < 90 || invertX > 270) {
                 rotation.x = (srx + difference.x) % 360
             } else {
                 rotation.x = (srx - difference.x) % 360
