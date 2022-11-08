@@ -6,6 +6,8 @@
     --white: #FDF9F5;
     --cube-size: min(60vw, 50vh);
     cursor: grab;
+    --sharp-corner: 7%;
+    --round-corner: 25%;
 }
 :root:active {
     cursor: grabbing;
@@ -49,7 +51,7 @@ body {
     width: var(--cube-size);
     aspect-ratio: 1;
     background-color: var(--black);
-    border-radius: 16px;
+    border-radius: calc(var(--sharp-corner) / 3 + 6px);
     padding: 1px;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -58,13 +60,26 @@ body {
 
 .sticker {
     border: 3px solid var(--white);
-    border-radius: 10px;
+    border-radius: var(--sharp-corner);
     display: flex;
     margin: 4%;
     justify-content: center;
     align-items: center;
     transition: 0.4s;
     backface-visibility: hidden;
+}
+
+.sticker:nth-child(2) {
+    border-radius: var(--sharp-corner) var(--sharp-corner) var(--round-corner) var(--round-corner);
+}.sticker:nth-child(4) {
+    border-radius: var(--sharp-corner) var(--round-corner) var(--round-corner) var(--sharp-corner);
+}.sticker:nth-child(5) {
+    border-radius: var(--round-corner);
+}
+.sticker:nth-child(6) {
+    border-radius: var(--round-corner) var(--sharp-corner) var(--sharp-corner) var(--round-corner);
+}.sticker:nth-child(8) {
+    border-radius: var(--round-corner) var(--round-corner) var(--sharp-corner) var(--sharp-corner);
 }
 
 /* Setting module (change theme, etc.) */

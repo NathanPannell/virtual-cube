@@ -123,7 +123,7 @@ const sensitivity = {x: 5, y: 5}
 let mouseDown = false;
 let hovering = false;
 let rotation = {x: 0, y: 0, z: 0}
-let invertX = false;
+let invertY;
 
 initializeCube()
 
@@ -485,7 +485,7 @@ $(document).bind("mousedown", function(e) {
     mpx = e.pageX
     mpy = e.pageY
     mouseDown = !hovering
-    invertX = (rotation.y % 360 + 360) % 360
+    invertY = (rotation.y % 360 + 360) % 360
 })
 
 // For Mobile
@@ -497,7 +497,7 @@ $(document).bind("touchstart", function(e) {
     srz = rotation.z
     mpx = e.originalEvent.touches[0].pageX
     mpy = e.originalEvent.touches[0].pageY
-    invertX = (rotation.y % 360 + 360) % 360
+    invertY = (rotation.y % 360 + 360) % 360
 })
 $(document).bind("mouseup touchend", function() {
     mouseDown = false
@@ -508,9 +508,8 @@ $(document).bind("mouseup touchend", function() {
 function move(e) {
     if(mouseDown) {
         let difference = {x: (e.pageX - mpx) / sensitivity.x, y: (e.pageY - mpy) / sensitivity.y}
-        
-        // When yellow is on top, x is rotated opposite (relative to initial position)
-        if(invertX < 90 || invertX > 270) {
+
+        if(invertY < 90 || invertY > 270) {
             rotation.x = (srx + difference.x) % 360
         } else {
             rotation.x = (srx - difference.x) % 360
@@ -552,7 +551,6 @@ for(let i = 0; i < stickers.length; i++) {
         startSticker = null
     })
 }
-
 
 // Mobile responsiveness (performs twists)
 // Finds the sticker at the point where the touch lifted
