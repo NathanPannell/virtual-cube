@@ -1,7 +1,7 @@
 :root {
     --black: #121118;
-    --dark: #34655D;
-    --med: #343434;
+    --dark: #1f4e46;
+    --white: #999999;
     --light: #B4DEE2;
     --white: #FDF9F5;
     --cube-size: min(60vw, 50vh);
@@ -59,10 +59,9 @@ body {
 }
 
 .sticker {
-    border: 3px solid var(--white);
+    border: 3px solid var(--black);
     border-radius: var(--sharp-corner);
     display: flex;
-    margin: 4%;
     justify-content: center;
     align-items: center;
     transition: 0.4s;
@@ -85,8 +84,9 @@ body {
 /* Setting module (change theme, etc.) */
 #settings {
     width: min(100%, var(--cube-size));
-    margin-top: calc(var(--cube-size) * 0.25);
-    background-color: var(--dark);
+    /* margin-top: calc(var(--cube-size) * 0.25); */
+    background-color: var(--white);
+    border: 5px solid var(--black);
     border-radius: 20px;
     padding: 20px;
     cursor: default;
@@ -97,23 +97,19 @@ button {
 }
 
 /* Change appearence of the cube for the dark theme */
-.dark-mode .face {
-    background-color: var(--med);
-}
-.dark-mode .sticker {
-    border-color: var(--black);
-}
+
 .dark-mode.body {
-    background-color: var(--black);
+    background-color: var(--dark);
 }
 
 /* Change appearance of the cube for the transparent theme */
 .clear .sticker {
     opacity: 75%;
+    border-color: transparent;
+    margin: 3px;
 }
 .clear .face {
     background-color: transparent;
-    border: none;
 }
 
 /* Responsiveness for stickers */

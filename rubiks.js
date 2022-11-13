@@ -1,4 +1,12 @@
 // Inspiration from https://ruwix.com/online-puzzle-simulators/
+//TODO: Save previous cube state, load that on page refresh, not new cube
+//TODO: Make multiple saved cubes
+//TODO: Create custom color themes (for each saved cube)
+//TODO: Generate efficient scrambles (maybe API from cstimer or other)
+//TODO: Celebration when solved
+//TODO: Download important scrambles (from wca.org or other)
+//TODO: Save moves in solution and play them back
+//TODO: Add timer with random scrambled moves
 
 const faces = $(".face")
 const cube = $(".cube")[0] // JQuery is very annoying for what I need to do with this element
@@ -127,7 +135,23 @@ let invertY;
 
 initializeCube()
 
-function initializeCube() {
+function resetCube() {
+    localStorage.setItem("isSaved", "false")
+    window.location.reload()
+}
+
+function saveCube() {
+    localStorage.setItem("edges", JSON.stringify(edges))
+    localStorage.setItem("corners", JSON.stringify(corners))
+    localStorage.setItem("centers", JSON.stringify(centers))
+    localStorage.setItem("isSaved", "true")
+}
+
+function loadCube() {
+    window.location.reload()
+}
+
+function newCube() {
     // Create an array of 12 edges (colorless)
     for (let i = 0; i < 12; i++) {
         let edge = {
@@ -172,6 +196,35 @@ function initializeCube() {
         centers.push(center)
     }
 
+    // Finish setup by assigning colors to each sticker (according to face)
+    setColors()
+}
+
+function recolorCube() {
+    let loadEdges = JSON.parse(localStorage.getItem("edges"))
+    let loadCorners = JSON.parse(localStorage.getItem("corners"))
+    let loadCenters = JSON.parse(localStorage.getItem("centers"))
+    for(let i = 0; i < edges.length; i++) {
+        edges[i].color0 = loadEdges[i].color0
+        edges[i].color1 = loadEdges[i].color1
+    }
+    for(let i = 0; i < corners.length; i++) {
+        corners[i].color0 = loadCorners[i].color0
+        corners[i].color1 = loadCorners[i].color1
+        corners[i].color2 = loadCorners[i].color2
+    }
+    for(let i = 0; i < centers.length; i++) {
+        centers[i].color = loadCenters[i].color
+    }
+}
+
+function initializeCube() {
+    newCube()
+    if(localStorage.getItem("isSaved") === "true") {
+        recolorCube()
+        console.log("recolored cube")
+    }
+
     // Generate blank stickers on each face 
     for (let i = 0; i < faces.length; i++) {
         faces[i].innerHTML = `
@@ -186,8 +239,6 @@ function initializeCube() {
         <div class="sticker none" id="8${faces[i].id}"></div>`
     }
 
-    // Finish setup by assigning colors to each sticker (according to face)
-    setColors()
     addListeners()
 
     // Updating transparent/dark themes by pulling from local storage
@@ -198,8 +249,6 @@ function initializeCube() {
 
     // Render colored cube
     renderCube()
-
-    // Cube rotates into 3D on page load
     rotateCube([-30,-30, 0])
 }  
 
@@ -277,10 +326,6 @@ function updateDarkMode() {
         $("body").removeClass("dark-mode")
     }
     localStorage.setItem("isDark", JSON.stringify(isDark))
-}
-
-function resetCube() {
-    window.location.reload()
 }
 
 function cyclePieces(arr, a, b, c, d) {
@@ -413,6 +458,7 @@ function addListeners() {
     for(let i = 0; i < stickers.length; i++) {
         stickers[i].addEventListener("mousedown", function(e) {
             startSticker = stickers[i].id
+            console.log(startSticker)
         })
         stickers[i].addEventListener("mouseup", function(e) {
             // If drag started off the cube and ends on a sticker, it is not counted
