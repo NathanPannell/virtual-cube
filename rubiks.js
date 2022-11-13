@@ -188,6 +188,7 @@ function initializeCube() {
 
     // Finish setup by assigning colors to each sticker (according to face)
     setColors()
+    addListeners()
 
     // Updating transparent/dark themes by pulling from local storage
     transparentEl.prop("checked", JSON.parse(localStorage.getItem("isTransparent")))
@@ -312,6 +313,159 @@ function rotateEdges(a, b, c, d) {
     edges[d].rotate()
 }
 
+
+function turn(move) {
+    if(move === "u") { U() }
+    else if(move === "U") { U_() }
+    else if(move === "d") { D() }
+    else if(move === "D") { D_() }
+    else if(move === "l") { L() }
+    else if(move === "L") { L_() }
+    else if(move === "r") { R() }
+    else if(move === "R") { R_() }
+    else if(move === "f") { F() }
+    else if(move === "F") { F_() }
+    else if(move === "b") { B() }
+    else if(move === "B") { B_() }
+    else if(move === "m") { M() }
+    else if(move === "M") { M_() }
+    else if(move === "e") { E() }
+    else if(move === "E") { E_() }
+    else if(move === "s") { S() }
+    else if(move === "S") { S_() }
+    renderCube()
+}
+
+// Applies rotation to cube with transition
+function rotateCube([dy, dx, dz]) {
+    rotation.x += dx
+    rotation.y += dy
+    rotation.z += dz
+    updateRotation(1)
+}
+
+// Updates/renders the cube when rotation vector is changed manually
+function updateRotation(time) {
+    cube.style = `
+    transition: ${time}s;
+    transform: translateZ(-200px)
+    rotateX(${rotation.y}deg)
+    rotateY(${rotation.x}deg)
+    rotateZ(${rotation.z}deg)
+    ;`
+}
+
+function startTwist(e) {
+    srx = rotation.x
+    sry = rotation.y
+    srz = rotation.z
+    mpx = e.pageX
+    mpy = e.pageY
+    invertY = (rotation.y % 360 + 360) % 360
+}
+
+function addListeners() {
+    // Turns cube on keypress
+    // (u)p, (d)own, (l)eft, (r)ight, 
+    // (f)ront, (b)ack, (m)iddle, (e)quator, (s)lice
+    // Press key for clockwise, SHIFT for counter-clockwise
+    document.addEventListener("keydown", function(e) {
+        turn(e.key)
+    })
+
+    // Cube cannot be rotated when the mouse is hovering
+    cube.addEventListener("mouseover", function() {
+        hovering = true
+    })
+    cube.addEventListener("mouseout", function() {
+        hovering = false
+    })
+
+    // Records initial condition of cube at start of rotation
+    $(document).bind("mousedown", function(e) {
+        mouseDown = !hovering
+        startTwist(e)
+    })
+    $(document).bind("touchstart", function(e) {
+        let elem = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY)
+        mouseDown = elem.className.includes("body") || elem.className.includes("scene")
+        // startTwist(e.originalEvent.touches[0])
+        srx = rotation.x
+        sry = rotation.y
+        srz = rotation.z
+        mpx = e.originalEvent.touches[0].pageX
+        mpy = e.originalEvent.touches[0].pageY
+        invertY = (rotation.y % 360 + 360) % 360
+    })
+    $(document).bind("mouseup touchend", function() {
+        mouseDown = false
+    })
+
+    $(document).bind('mousemove', function(e) {
+        move(e)
+    })
+    $(document).bind('touchmove', function(e) {
+        move(e.changedTouches[0])
+    })
+        
+    // This allows tracking of drags (start/end)
+    const stickers = $(".face").children()
+    for(let i = 0; i < stickers.length; i++) {
+        stickers[i].addEventListener("mousedown", function(e) {
+            startSticker = stickers[i].id
+        })
+        stickers[i].addEventListener("mouseup", function(e) {
+            // If drag started off the cube and ends on a sticker, it is not counted
+            // For now, the only allowed drags are using the same side stickers
+            endSticker = stickers[i].id
+            if(startSticker && startSticker.slice(1) === endSticker.slice(1)) {
+                key = startSticker[0] + endSticker
+                turn(dragCode[key])
+            }
+            startSticker = null
+        })
+    
+        // More Mobile 😖
+        stickers[i].addEventListener("touchstart", function(e) {
+            startSticker = stickers[i].id
+        })
+        stickers[i].addEventListener("touchcancel", function(e) {
+            startSticker = null
+        })
+    }
+    
+    // Mobile responsiveness (performs twists)
+    // Finds the sticker at the point where the touch lifted
+    // Performs a move using start and end stickers of drag
+    document.addEventListener("touchend", function(e) {
+        let elem = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY)
+        if(elem.className.includes("sticker")) {
+            endSticker = elem.id
+            if(startSticker && startSticker.slice(1) === endSticker.slice(1)) {
+                key = startSticker[0] + endSticker
+                turn(dragCode[key])
+            }
+            startSticker = null
+        }
+    })
+}
+
+// Calculates the angle of rotation for the cube
+// TODO: More comprehensive rotation inversion (different color on top, not just white or yellow)
+function move(e) {
+    if(mouseDown) {
+        let difference = {x: (e.pageX - mpx) / sensitivity.x, y: (e.pageY - mpy) / sensitivity.y}
+
+        if(invertY < 90 || invertY > 270) {
+            rotation.x = (srx + difference.x) % 360
+        } else {
+            rotation.x = (srx - difference.x) % 360
+        }
+        rotation.y = (sry - difference.y)
+        updateRotation(0)
+    }
+}
+
 function M() {
     cycleCenters(0, 4, 2, 5) 
     cycleEdges(0, 2, 10, 8)
@@ -419,150 +573,3 @@ function B_() {
     cycleCorners(1, 2, 6, 5)
     rotateCorners(1, 2, 6, 5)
 }
-
-function turn(move) {
-    if(move === "u") { U() }
-    else if(move === "U") { U_() }
-    else if(move === "d") { D() }
-    else if(move === "D") { D_() }
-    else if(move === "l") { L() }
-    else if(move === "L") { L_() }
-    else if(move === "r") { R() }
-    else if(move === "R") { R_() }
-    else if(move === "f") { F() }
-    else if(move === "F") { F_() }
-    else if(move === "b") { B() }
-    else if(move === "B") { B_() }
-    else if(move === "m") { M() }
-    else if(move === "M") { M_() }
-    else if(move === "e") { E() }
-    else if(move === "E") { E_() }
-    else if(move === "s") { S() }
-    else if(move === "S") { S_() }
-    renderCube()
-}
-
-// Turns cube on keypress
-// (u)p, (d)own, (l)eft, (r)ight, 
-// (f)ront, (b)ack, (m)iddle, (e)quator, (s)lice
-// Press key for clockwise, SHIFT for counter-clockwise
-document.addEventListener("keydown", function(e) {
-    turn(e.key)
-})
-
-// Applies rotation to cube with transition
-function rotateCube([dy, dx, dz]) {
-    rotation.x += dx
-    rotation.y += dy
-    rotation.z += dz
-    updateRotation(1)
-}
-
-// Updates/renders the cube when rotation vector is changed manually
-function updateRotation(time) {
-    cube.style = `
-    transition: ${time}s;
-    transform: translateZ(-200px)
-    rotateX(${rotation.y}deg)
-    rotateY(${rotation.x}deg)
-    rotateZ(${rotation.z}deg)
-    ;`
-}
-
-// Cube cannot be rotated when the mouse is hovering
-cube.addEventListener("mouseover", function() {
-    hovering = true
-})
-cube.addEventListener("mouseout", function() {
-    hovering = false
-})
-
-// Records initial condition of cube at start of rotation
-$(document).bind("mousedown", function(e) {
-    srx = rotation.x
-    sry = rotation.y
-    srz = rotation.z
-    mpx = e.pageX
-    mpy = e.pageY
-    mouseDown = !hovering
-    invertY = (rotation.y % 360 + 360) % 360
-})
-
-// For Mobile
-$(document).bind("touchstart", function(e) {
-    let elem = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY)
-    mouseDown = elem.className.includes("body") || elem.className.includes("scene")
-    srx = rotation.x
-    sry = rotation.y
-    srz = rotation.z
-    mpx = e.originalEvent.touches[0].pageX
-    mpy = e.originalEvent.touches[0].pageY
-    invertY = (rotation.y % 360 + 360) % 360
-})
-$(document).bind("mouseup touchend", function() {
-    mouseDown = false
-})
-
-// Calculates the angle of rotation for the cube
-// TODO: More comprehensive rotation inversion (different color on top, not just white or yellow)
-function move(e) {
-    if(mouseDown) {
-        let difference = {x: (e.pageX - mpx) / sensitivity.x, y: (e.pageY - mpy) / sensitivity.y}
-
-        if(invertY < 90 || invertY > 270) {
-            rotation.x = (srx + difference.x) % 360
-        } else {
-            rotation.x = (srx - difference.x) % 360
-        }
-        rotation.y = (sry - difference.y)
-        updateRotation(0)
-    }
-}
-
-$(document).bind('mousemove', function(e) {
-    move(e)
-})
-$(document).bind('touchmove', function(e) {
-    move(e.changedTouches[0])
-})
-    
-// This allows tracking of drags (start/end)
-const stickers = $(".face").children()
-for(let i = 0; i < stickers.length; i++) {
-    stickers[i].addEventListener("mousedown", function(e) {
-        startSticker = stickers[i].id
-    })
-    stickers[i].addEventListener("mouseup", function(e) {
-        // If drag started off the cube and ends on a sticker, it is not counted
-        // For now, the only allowed drags are using the same side stickers
-        endSticker = stickers[i].id
-        if(startSticker && startSticker.slice(1) === endSticker.slice(1)) {
-            key = startSticker[0] + endSticker
-            turn(dragCode[key])
-        }
-        startSticker = null
-    })
-
-    // More Mobile 😖
-    stickers[i].addEventListener("touchstart", function(e) {
-        startSticker = stickers[i].id
-    })
-    stickers[i].addEventListener("touchcancel", function(e) {
-        startSticker = null
-    })
-}
-
-// Mobile responsiveness (performs twists)
-// Finds the sticker at the point where the touch lifted
-// Performs a move using start and end stickers of drag
-document.addEventListener("touchend", function(e) {
-    let elem = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY)
-    if(elem.className.includes("sticker")) {
-        endSticker = elem.id
-        if(startSticker && startSticker.slice(1) === endSticker.slice(1)) {
-            key = startSticker[0] + endSticker
-            turn(dragCode[key])
-        }
-        startSticker = null
-    }
-})
