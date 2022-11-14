@@ -1,9 +1,6 @@
 :root {
-    --black: #121118;
     --dark: #1f4e46;
-    --white: #999999;
     --light: #B4DEE2;
-    --white: #FDF9F5;
     --cube-size: min(60vw, 50vh);
     cursor: grab;
     --sharp-corner: 7%;
@@ -50,7 +47,7 @@ body {
     position: absolute;
     width: var(--cube-size);
     aspect-ratio: 1;
-    background-color: var(--black);
+    background-color: black;
     border-radius: calc(var(--sharp-corner) / 3 + 6px);
     padding: 1px;
     display: grid;
@@ -59,7 +56,7 @@ body {
 }
 
 .sticker {
-    border: 3px solid var(--black);
+    border: 3px solid black;
     border-radius: var(--sharp-corner);
     display: flex;
     justify-content: center;
@@ -85,8 +82,8 @@ body {
 #settings {
     width: min(100%, var(--cube-size));
     /* margin-top: calc(var(--cube-size) * 0.25); */
-    background-color: var(--white);
-    border: 5px solid var(--black);
+    background-color: white;
+    border: 5px solid black;
     border-radius: 20px;
     padding: 20px;
     cursor: default;
@@ -116,9 +113,6 @@ button {
 .sticker:hover,
 .sticker:active {
     opacity: 50%;
-}
-.sticker:active {
-    margin: 5%;
 }
 
 /* Positions the faces of the cube in 3D */

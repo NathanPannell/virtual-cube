@@ -1,5 +1,4 @@
 // Inspiration from https://ruwix.com/online-puzzle-simulators/
-//TODO: Save previous cube state, load that on page refresh, not new cube
 //TODO: Make multiple saved cubes
 //TODO: Create custom color themes (for each saved cube)
 //TODO: Generate efficient scrambles (maybe API from cstimer or other)
@@ -127,7 +126,13 @@ let startSticker;
 let endSticker;
 
 // Rotation variables
-const sensitivity = {x: 5, y: 5}
+const sensitivity = {x: window.innerWidth / 200, y: window.innerHeight / 200}
+if(sensitivity.x > 5) {
+    sensitivity.x = 5
+}
+if(sensitivity.y > 5) {
+    sensitivity.y = 5
+}
 let mouseDown = false;
 let hovering = false;
 let rotation = {x: 0, y: 0, z: 0}
@@ -149,6 +154,13 @@ function saveCube() {
 
 function loadCube() {
     window.location.reload()
+}
+
+function scrambleCube() {
+    for(let i = 0; i < 100; i++) {
+        let char = "u"
+        turn(char)
+    }
 }
 
 function newCube() {
@@ -400,7 +412,7 @@ function updateRotation(time) {
     ;`
 }
 
-function startTwist(e) {
+function startRotation(e) {
     srx = rotation.x
     sry = rotation.y
     srz = rotation.z
@@ -429,12 +441,12 @@ function addListeners() {
     // Records initial condition of cube at start of rotation
     $(document).bind("mousedown", function(e) {
         mouseDown = !hovering
-        startTwist(e)
+        startRotation(e)
     })
     $(document).bind("touchstart", function(e) {
         let elem = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY)
         mouseDown = elem.className.includes("body") || elem.className.includes("scene")
-        // startTwist(e.originalEvent.touches[0])
+        // startRotation(e.originalEvent.touches[0])
         srx = rotation.x
         sry = rotation.y
         srz = rotation.z
