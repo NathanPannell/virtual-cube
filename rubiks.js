@@ -4,8 +4,8 @@
 //TODO: Generate efficient scrambles (maybe API from cstimer or other)
 //TODO: Celebration when solved
 //TODO: Download important scrambles (from wca.org or other)
-//TODO: Save moves in solution and play them back
-//TODO: Add timer with random scrambled moves
+//TODO: Save possibleMoves in solution and play them back
+//TODO: Add timer with random scrambled possibleMoves
 
 const faces = $(".face")
 const cube = $(".cube")[0] // JQuery is very annoying for what I need to do with this element
@@ -18,6 +18,8 @@ const rightFace = $("#right")
 const transparentEl = $("#transparent")
 const darkEl = $("#dark")
 let isDark, isTransparent
+const style = document.createElement("style");
+document.head.appendChild(style);
 
 // Mapping of piece objects to colored stickers
 // C = Corner, E = Edge, M = Middle
@@ -31,8 +33,8 @@ const rightCode = ["C02", "E11", "C11", "E41", "M10", "E51", "C41", "E91", "C52"
 
 // Mapping of piece combinations to twists
 // Read: "<start sticker id #><end sticker id #><face>"
-// At the moment, only moves along one face are possible
-// TODO: Add codes for moves across faces
+// At the moment, only possibleMoves along one face are possible
+// TODO: Add codes for possibleMoves across faces
 const dragCode = {
     "21front": "u", "20front": "u", "10front": "u",
     "21right": "u", "20right": "u", "10right": "u",
@@ -120,6 +122,8 @@ const dragCode = {
 let edges = []
 let corners = []
 let centers = []
+const possibleMoves = "uUdDfFbBrRlL"
+const scrambleMoves = 100
 
 // Drag-to-turn variables
 let startSticker;
@@ -140,6 +144,13 @@ let invertY;
 
 initializeCube()
 
+style.innerHTML = `
+#target {
+color: blueviolet;
+}
+`;
+
+
 function resetCube() {
     localStorage.setItem("isSaved", "false")
     window.location.reload()
@@ -156,11 +167,26 @@ function loadCube() {
     window.location.reload()
 }
 
-function scrambleCube() {
-    for(let i = 0; i < 100; i++) {
-        let char = "u"
+async function scrambleCube() {
+    style.innerHTML = `
+        .sticker {
+            transition: 0s;
+        }`
+    for(let i = 0; i < scrambleMoves; i++) {
+        let char = possibleMoves[Math.floor(Math.random() * possibleMoves.length)]
         turn(char)
+        await delay(3000 / scrambleMoves)
     }
+    style.innerHTML = `
+        .sticker {
+            transition: 0.25s;
+        }`
+}
+
+function delay(milliseconds){
+    return new Promise(resolve => {
+        setTimeout(resolve, milliseconds);
+    });
 }
 
 function newCube() {
@@ -369,7 +395,6 @@ function rotateEdges(a, b, c, d) {
     edges[c].rotate()
     edges[d].rotate()
 }
-
 
 function turn(move) {
     if(move === "u") { U() }
