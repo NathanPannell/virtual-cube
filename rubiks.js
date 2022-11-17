@@ -480,16 +480,23 @@ function addListeners() {
         mpy = e.originalEvent.touches[0].pageY
         invertY = (rotation.y % 360 + 360) % 360
     })
+    $(document).bind("touchcancel", function() {
+        activeFace = null;
+        startSticker = null;
+        endSticker = null;
+    })
     $(document).bind("mouseup touchend", function() {
         mouseDown = false
-        if(startSticker && startSticker.slice(1) === endSticker.slice(1)) {
+        if(startSticker && endSticker && startSticker.slice(1) === endSticker.slice(1)) {
             key = startSticker[0] + endSticker
             turn(dragCode[key])
         }
         startSticker = null
         activeFace = null
     })
+    
 
+    // tracking movement of mouse
     $(document).bind('mousemove', function(e) {
         move(e)
     })
@@ -503,37 +510,27 @@ function addListeners() {
         stickers[i].addEventListener("mousedown", function(e) {
             startSticker = stickers[i].id
             activeFace = startSticker.slice(1)
-            console.log(startSticker)
         })
-        stickers[i].addEventListener("mouseup", function(e) {
-            // If drag started off the cube and ends on a sticker, it is not counted
-            // For now, the only allowed drags are using the same side stickers
-            
-        })
-    
-        // More Mobile 😖
         stickers[i].addEventListener("touchstart", function(e) {
             startSticker = stickers[i].id
-        })
-        stickers[i].addEventListener("touchcancel", function(e) {
-            startSticker = null
+            activeFace = startSticker.slice(1)
         })
     }
     
-    // Mobile responsiveness (performs twists)
-    // Finds the sticker at the point where the touch lifted
-    // Performs a move using start and end stickers of drag
-    document.addEventListener("touchend", function(e) {
-        let elem = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY)
-        if(elem.className.includes("sticker")) {
-            endSticker = elem.id
-            if(startSticker && startSticker.slice(1) === endSticker.slice(1)) {
-                key = startSticker[0] + endSticker
-                turn(dragCode[key])
-            }
-            startSticker = null
-        }
-    })
+    // // Mobile responsiveness (performs twists)
+    // // Finds the sticker at the point where the touch lifted
+    // // Performs a move using start and end stickers of drag
+    // document.addEventListener("touchend", function(e) {
+    //     let elem = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY)
+    //     if(elem && elem.className.includes("sticker")) {
+    //         endSticker = elem.id
+    //         if(startSticker && startSticker.slice(1) === endSticker.slice(1)) {
+    //             key = startSticker[0] + endSticker
+    //             turn(dragCode[key])
+    //         }
+    //         startSticker = null
+    //     }
+    // })
 }
 
 // Calculates the angle of rotation for the cube
@@ -549,12 +546,14 @@ function move(e) {
         }
         rotation.y = (sry - difference.y)
         updateRotation(0)
+    } else {
+        let elem = document.elementFromPoint(e.clientX, e.clientY)
+        if(elem && elem.className.includes("sticker") && elem.id.slice(1) === activeFace) {
+            endSticker = elem.id
+            console.log(endSticker)
+        }
     }
-    let elem = document.elementFromPoint(e.clientX, e.clientY)
-    if(elem.className.includes("sticker") && elem.id.slice(1) === activeFace) {
-        endSticker = elem.id
-        console.log(endSticker)
-    }
+    
 }
 
 function M() {
