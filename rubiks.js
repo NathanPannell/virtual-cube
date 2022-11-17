@@ -128,6 +128,7 @@ const scrambleMoves = 100
 // Drag-to-turn variables
 let startSticker;
 let endSticker;
+let activeFace;
 
 // Rotation variables
 const sensitivity = {x: window.innerWidth / 200, y: window.innerHeight / 200}
@@ -170,7 +171,7 @@ function loadCube() {
 async function scrambleCube() {
     style.innerHTML = `
         .sticker {
-            transition: 0s;
+            transition: ${3 / scrambleMoves}s;
         }`
     for(let i = 0; i < scrambleMoves; i++) {
         let char = possibleMoves[Math.floor(Math.random() * possibleMoves.length)]
@@ -481,6 +482,12 @@ function addListeners() {
     })
     $(document).bind("mouseup touchend", function() {
         mouseDown = false
+        if(startSticker && startSticker.slice(1) === endSticker.slice(1)) {
+            key = startSticker[0] + endSticker
+            turn(dragCode[key])
+        }
+        startSticker = null
+        activeFace = null
     })
 
     $(document).bind('mousemove', function(e) {
@@ -495,17 +502,13 @@ function addListeners() {
     for(let i = 0; i < stickers.length; i++) {
         stickers[i].addEventListener("mousedown", function(e) {
             startSticker = stickers[i].id
+            activeFace = startSticker.slice(1)
             console.log(startSticker)
         })
         stickers[i].addEventListener("mouseup", function(e) {
             // If drag started off the cube and ends on a sticker, it is not counted
             // For now, the only allowed drags are using the same side stickers
-            endSticker = stickers[i].id
-            if(startSticker && startSticker.slice(1) === endSticker.slice(1)) {
-                key = startSticker[0] + endSticker
-                turn(dragCode[key])
-            }
-            startSticker = null
+            
         })
     
         // More Mobile 😖
@@ -546,6 +549,11 @@ function move(e) {
         }
         rotation.y = (sry - difference.y)
         updateRotation(0)
+    }
+    let elem = document.elementFromPoint(e.clientX, e.clientY)
+    if(elem.className.includes("sticker") && elem.id.slice(1) === activeFace) {
+        endSticker = elem.id
+        console.log(endSticker)
     }
 }
 

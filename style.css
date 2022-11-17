@@ -1,7 +1,7 @@
 :root {
     --dark: #1f4e46;
     --light: #B4DEE2;
-    --cube-size: min(60vw, 50vh);
+    --cube-size: min(60vw, 50vh, 300px);
     cursor: grab;
     --sharp-corner: 7%;
     --round-corner: 25%;
