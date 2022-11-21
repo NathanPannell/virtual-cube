@@ -180,7 +180,7 @@ async function scrambleCube() {
     }
     style.innerHTML = `
         .sticker {
-            transition: 0.25s;
+            transition: 0;
         }`
 }
 
