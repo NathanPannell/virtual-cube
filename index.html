@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <!-- pokemon branch -->
     <meta charset="UTF-8">
@@ -12,7 +13,22 @@
 </head>
 <!--    ondragstart and ondrop prevent user from 'dragging' elements
         off the screen when they are rotating the cube or turning it -->
+
 <body class="body" ondragstart="return false;" ondrop="return false;">
+
+    <div class="container">
+        <input type="text" name="pokemon-name" id="pokemon-name" placeholder="Pokemon name">
+        <label for="pokemon-name"></label>
+        <button onclick="queryPokemon()">Submit</button>
+
+        <div class="info" id="side1"></div>
+        <div class="info" id="side2"></div>
+        <div class="info" id="side3"></div>
+        <div class="info" id="side4"></div>
+        <div class="info" id="side5"></div>
+        <div class="info" id="side6"></div>
+    </div>
+
     <div class="scene">
         <div class="cube" id="cube">
             <div class="face" id="front"></div>
@@ -22,18 +38,19 @@
             <div class="face" id="left"></div>
             <div class="face" id="right"></div>
         </div>
-    </div> 
+    </div>
     <div id="settings">
         <input type="checkbox" name="transparent" id="transparent" onclick="updateTransparent()">
         <label for="transparent">Transparent Cube</label><br>
         <input type="checkbox" name="dark" id="dark" onclick="updateDarkMode()">
         <label for="dark">Dark Mode</label><br>
         <button onclick="resetCube()">Reset</button>
-        <button onclick="saveCube()">Save</button>
-        <button onclick="loadCube()">Load</button>
+        <!-- <button onclick="saveCube()">Save</button>
+        <button onclick="loadCube()">Load</button> -->
         <button onclick="scrambleCube()">Scramble</button>
     </div>
     <script src="rubiks.js"></script>
     <!-- <script src="rubiks3D.js"></script> -->
 </body>
+
 </html>

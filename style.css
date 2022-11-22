@@ -62,19 +62,8 @@ body {
     justify-content: center;
     align-items: center;
     backface-visibility: hidden;
-}
-
-.sticker:nth-child(2) {
-    border-radius: var(--sharp-corner) var(--sharp-corner) var(--round-corner) var(--round-corner);
-}.sticker:nth-child(4) {
-    border-radius: var(--sharp-corner) var(--round-corner) var(--round-corner) var(--sharp-corner);
-}.sticker:nth-child(5) {
-    border-radius: var(--round-corner);
-}
-.sticker:nth-child(6) {
-    border-radius: var(--round-corner) var(--sharp-corner) var(--sharp-corner) var(--round-corner);
-}.sticker:nth-child(8) {
-    border-radius: var(--round-corner) var(--round-corner) var(--sharp-corner) var(--sharp-corner);
+    background-size: 100%;
+    background-color: white;
 }
 
 /* Setting module (change theme, etc.) */
@@ -129,7 +118,7 @@ button {
 .orange { background-color: #FF5900; }
 .white { background-color: #FFFFFF; }
 .yellow { background-color: #FFD500; }
-.none { background-color: transparent; }
+.none { background-color: rgba(255, 255, 255, 0.5); }
 
 /* Prevents screen from growing outside of screen size.
     Should prevent scrolling on mobile.

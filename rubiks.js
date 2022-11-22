@@ -126,9 +126,17 @@ const possibleMoves = "uUdDfFbBrRlL"
 const scrambleMoves = 100
 
 // Drag-to-turn variables
-let startSticker;
-let endSticker;
-let activeFace;
+let startSticker
+let endSticker
+let activeFace
+
+// Recolor variables
+let redURL
+let orangeURL
+let whiteURL
+let yellowURL
+let blueURL
+let greenURL
 
 // Rotation variables
 const sensitivity = {x: window.innerWidth / 200, y: window.innerHeight / 200}
@@ -165,7 +173,8 @@ function saveCube() {
 }
 
 function loadCube() {
-    window.location.reload()
+    recolorCube()
+    renderCube()
 }
 
 async function scrambleCube() {
@@ -196,10 +205,15 @@ function newCube() {
         let edge = {
             color0: "none",
             color1: "none",
+            url0: null,
+            url1: null,
             rotate: function () {
                 let temp = this.color0
                 this.color0 = this.color1
                 this.color1 = temp
+                temp = this.url0
+                this.url0 = this.url1
+                this.url1 = temp
             }
         }
         edges.push(edge)
@@ -211,17 +225,28 @@ function newCube() {
             color0: "none",
             color1: "none",
             color2: "none",
+            url0: null,
+            url1: null,
+            url2: null,
             rotateA: function () {
                 let temp = this.color0
                 this.color0 = this.color1
                 this.color1 = this.color2
                 this.color2 = temp
+                temp = this.url0
+                this.url0 = this.url1
+                this.url1 = this.url2
+                this.url2 = temp
             },
             rotateB: function () {
                 let temp = this.color2
                 this.color2 = this.color1
                 this.color1 = this.color0
                 this.color0 = temp
+                temp = this.url2
+                this.url2 = this.url1
+                this.url1 = this.url0
+                this.url0 = temp
             }
         }
         corners.push(corner)
@@ -230,7 +255,8 @@ function newCube() {
     // Create an array of 6 centers (colorless)
     for (let i = 0; i < 6; i++) {
         let center = {
-            color: "none"
+            color: "none",
+            url: null
         }
         centers.push(center)
     }
@@ -246,36 +272,38 @@ function recolorCube() {
     for(let i = 0; i < edges.length; i++) {
         edges[i].color0 = loadEdges[i].color0
         edges[i].color1 = loadEdges[i].color1
+        edges[i].url0 = loadEdges[i].url0
+        edges[i].url1 = loadEdges[i].url1
     }
     for(let i = 0; i < corners.length; i++) {
         corners[i].color0 = loadCorners[i].color0
         corners[i].color1 = loadCorners[i].color1
         corners[i].color2 = loadCorners[i].color2
+        corners[i].url0 = loadCorners[i].url0
+        corners[i].url1 = loadCorners[i].url1
+        corners[i].url2 = loadCorners[i].url2
     }
     for(let i = 0; i < centers.length; i++) {
         centers[i].color = loadCenters[i].color
+        centers[i].url = loadCenters[i].url
     }
 }
 
 function initializeCube() {
     newCube()
-    if(localStorage.getItem("isSaved") === "true") {
-        recolorCube()
-        console.log("recolored cube")
-    }
 
     // Generate blank stickers on each face 
     for (let i = 0; i < faces.length; i++) {
         faces[i].innerHTML = `
-        <div class="sticker none" id="0${faces[i].id}"></div>
-        <div class="sticker none" id="1${faces[i].id}"></div>
-        <div class="sticker none" id="2${faces[i].id}"></div>
-        <div class="sticker none" id="3${faces[i].id}"></div>
-        <div class="sticker none" id="4${faces[i].id}"></div>
-        <div class="sticker none" id="5${faces[i].id}"></div>
-        <div class="sticker none" id="6${faces[i].id}"></div>
-        <div class="sticker none" id="7${faces[i].id}"></div>
-        <div class="sticker none" id="8${faces[i].id}"></div>`
+        <div class="sticker" id="0${faces[i].id}"></div>
+        <div class="sticker" id="1${faces[i].id}"></div>
+        <div class="sticker" id="2${faces[i].id}"></div>
+        <div class="sticker" id="3${faces[i].id}"></div>
+        <div class="sticker" id="4${faces[i].id}"></div>
+        <div class="sticker" id="5${faces[i].id}"></div>
+        <div class="sticker" id="6${faces[i].id}"></div>
+        <div class="sticker" id="7${faces[i].id}"></div>
+        <div class="sticker" id="8${faces[i].id}"></div>`
     }
 
     addListeners()
@@ -293,26 +321,29 @@ function initializeCube() {
 
 // Initializes the colors for each side
 function setColors() {
-    setFace(frontCode, "green")
-    setFace(backCode, "blue")
-    setFace(topCode, "white")
-    setFace(bottomCode, "yellow")
-    setFace(leftCode, "orange")
-    setFace(rightCode, "red")
+    setFace(frontCode, "#009B48", greenURL)
+    setFace(backCode, "#0045AD", blueURL)
+    setFace(topCode, "#FFFFFF", whiteURL)
+    setFace(bottomCode, "#FFD500", yellowURL)
+    setFace(leftCode, "#FF5900", orangeURL)
+    setFace(rightCode, "#B90000", redURL)
 }
 
 // Accesses elements from centers, edges, or corners and sets to <colorName>
-function setFace(faceCode, colorName) {
+function setFace(faceCode, colorName, url) {
     for(let i = 0; i < 9; i++) {
         let type = faceCode[i][0]
         let index = parseInt(faceCode[i][1], 16)
         let color = parseInt(faceCode[i][2])
         if(type === "C") {
             corners[index]["color" + color] = colorName
+            corners[index]["url" + color] = url
         } else if(type === "E") {
             edges[index]["color" + color] = colorName
+            edges[index]["url" + color] = url
         } else {
             centers[index].color = colorName
+            centers[index].url = url
         }   
     }
 }
@@ -338,12 +369,19 @@ function renderFace(face, faceCode) {
         let index = parseInt(faceCode[i][1], 16)
         let color = parseInt(faceCode[i][2])
         if(type === "C") {
-            sticker.addClass(corners[index]["color" + color])
+            sticker.css("background", `url(${corners[index]["url" + color]}) center center no-repeat`) 
+            sticker.css("background-color", corners[index]["color" + color])
         } else if(type === "E") {
-            sticker.addClass(edges[index]["color" + color])
+            sticker.css("background", `url(${edges[index]["url" + color]}) center center no-repeat`) 
+            sticker.css("background-color", edges[index]["color" + color])
         } else {
-            sticker.addClass(centers[index].color)
-        }   
+            sticker.css("background", `url(${centers[index].url}) center center no-repeat`) 
+            sticker.css("background-color", centers[index].color)
+        } 
+        sticker.css("background-size", "80%")
+        if(face == backFace) {
+            sticker.css("rotate", "180deg")
+        }
     }
 }
 
@@ -421,9 +459,9 @@ function turn(move) {
 
 // Applies rotation to cube with transition
 function rotateCube([dy, dx, dz]) {
-    rotation.x += dx
-    rotation.y += dy
-    rotation.z += dz
+    rotation.x = dx
+    rotation.y = dy
+    rotation.z = dz
     updateRotation(1)
 }
 
@@ -516,21 +554,6 @@ function addListeners() {
             activeFace = startSticker.slice(1)
         })
     }
-    
-    // // Mobile responsiveness (performs twists)
-    // // Finds the sticker at the point where the touch lifted
-    // // Performs a move using start and end stickers of drag
-    // document.addEventListener("touchend", function(e) {
-    //     let elem = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY)
-    //     if(elem && elem.className.includes("sticker")) {
-    //         endSticker = elem.id
-    //         if(startSticker && startSticker.slice(1) === endSticker.slice(1)) {
-    //             key = startSticker[0] + endSticker
-    //             turn(dragCode[key])
-    //         }
-    //         startSticker = null
-    //     }
-    // })
 }
 
 // Calculates the angle of rotation for the cube
@@ -550,10 +573,8 @@ function move(e) {
         let elem = document.elementFromPoint(e.clientX, e.clientY)
         if(elem && elem.className.includes("sticker") && elem.id.slice(1) === activeFace) {
             endSticker = elem.id
-            console.log(endSticker)
         }
     }
-    
 }
 
 function M() {
@@ -662,4 +683,100 @@ function B_() {
     rotateEdges(2, 6, 10, 5)
     cycleCorners(1, 2, 6, 5)
     rotateCorners(1, 2, 6, 5)
+}
+
+function queryPokemon() {
+    const complement = {
+        "red": "orange",
+        "green": "blue",
+        "blue": "green",
+        "brown": "white",
+        "yellow": "white",
+        "purple": "pink",
+        "white": "yellow",
+        "black": "white",
+        "pink": "purple",
+        "gray": "white"
+    }
+
+    let xhttp = new XMLHttpRequest()
+    let xhttp2 = new XMLHttpRequest()
+    xhttp.onreadystatechange = function() {
+        if(this.readyState == 4 && this.status == 200) {
+            let json = JSON.parse(xhttp.responseText)
+            redURL = json.sprites.front_default
+            orangeURL = json.sprites.front_shiny
+            whiteURL = `images/types/${json.types[0].type.name}.avif`
+            if(json.types.length > 1) {
+                yellowURL = `images/types/${json.types[1].type.name}.avif`
+            } else {
+                yellowURL = `images/types/${json.types[0].type.name}.avif`
+            }
+            let highest = {
+                qty: 0,
+                stat: ""
+            }
+            for(let i = 0; i < json.stats.length; i++) {
+                if(json.stats[i].base_stat > highest.qty) {
+                    highest.qty = json.stats[i].base_stat
+                    highest.stat = json.stats[i].stat.name
+                }
+            }
+            greenURL = `images/stats/${highest.stat}.png`
+            if(json.weight < 300) {
+                blueURL = "images/light.png"
+            } else {
+                blueURL = "images/heavy.png"
+            }
+            $(".info").css("background-size", "100%") 
+
+            source = second + $("#pokemon-name").val()
+            
+        }
+        xhttp2.open("GET", source, true)
+        xhttp2.send()
+    }
+    xhttp2.onreadystatechange = function() {
+        if(this.readyState == 4 && this.status == 200) {
+            let json = JSON.parse(xhttp2.responseText)
+            if(json.color.name == "white" || json.color.name == "black" || json.color.name == "gray") {
+                let temp1 = redURL
+                redURL = whiteURL
+                whiteURL = temp1
+                let temp2 = orangeURL
+                orangeURL = yellowURL
+                yellowURL = temp2
+            } else if(json.color.name == "yellow") {
+                let temp1 = redURL
+                redURL = yellowURL
+                yellowURL = temp1
+                let temp2 = orangeURL
+                orangeURL = whiteURL
+                whiteURL = temp2
+            } else if(json.color.name == "blue") {
+                let temp1 = redURL
+                redURL = blueURL
+                blueURL = temp1
+                let temp2 = orangeURL
+                orangeURL = greenURL
+                greenURL = temp2
+            } else if(json.color.name == "green") {
+                let temp1 = redURL
+                redURL = greenURL
+                greenURL = temp1
+                let temp2 = orangeURL
+                orangeURL = blueURL
+                blueURL = temp2
+            }
+
+        }
+        initializeCube()
+    }
+
+    let source
+    const main = "https://pokeapi.co/api/v2/pokemon/"
+    const second = "https://pokeapi.co/api/v2/pokemon-species/"
+    source = main + $("#pokemon-name").val()
+    xhttp.open("GET", source, true)
+    xhttp.send()
 }
