@@ -2,7 +2,10 @@
 <html lang="en">
 
 <head>
-    <!-- pokemon branch -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
+
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,22 +15,14 @@
     <link rel="shortcut icon" href="images/logo.png" type="image/x-icon">
 </head>
 <!--    ondragstart and ondrop prevent user from 'dragging' elements
-        off the screen when they are rotating the cube or turning it -->
+    off the screen when they are rotating the cube or turning it -->
 
 <body class="body" ondragstart="return false;" ondrop="return false;">
+    <a id="home" href="home.html">🏠</a>
 
-    <div class="container">
-        <input type="text" name="pokemon-name" id="pokemon-name" placeholder="Pokemon name">
-        <label for="pokemon-name"></label>
-        <button onclick="queryPokemon()">Submit</button>
-
-        <div class="info" id="side1"></div>
-        <div class="info" id="side2"></div>
-        <div class="info" id="side3"></div>
-        <div class="info" id="side4"></div>
-        <div class="info" id="side5"></div>
-        <div class="info" id="side6"></div>
-    </div>
+    <button id="button" onclick="toggleDark()">
+        <div id="dot"></div>
+    </button>
 
     <div class="scene">
         <div class="cube" id="cube">
@@ -40,17 +35,16 @@
         </div>
     </div>
     <div id="settings">
-        <input type="checkbox" name="transparent" id="transparent" onclick="updateTransparent()">
-        <label for="transparent">Transparent Cube</label><br>
-        <input type="checkbox" name="dark" id="dark" onclick="updateDarkMode()">
-        <label for="dark">Dark Mode</label><br>
+        <!-- <input type="checkbox" name="transparent" id="transparent" onclick="updateTransparent()">
+        <label for="transparent">Transparent Cube</label><br> -->
         <button onclick="resetCube()">Reset</button>
         <!-- <button onclick="saveCube()">Save</button>
         <button onclick="loadCube()">Load</button> -->
         <button onclick="scrambleCube()">Scramble</button>
+        <button onclick="toggleTransparent()">Transparent</button>
     </div>
     <script src="rubiks.js"></script>
-    <!-- <script src="rubiks3D.js"></script> -->
+    <script src="dark.js"></script>
 </body>
 
 </html>

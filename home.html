@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <link rel="stylesheet" href="home.css">
+    <link rel="shortcut icon" href="images/logo.png" type="image/x-icon">
+</head>
+
+<body>
+    <div class="container">
+        <h1>PokeCube</h1>
+        <button id="button" onclick="toggleDark()">
+            <div id="dot"></div>
+        </button>
+
+        <div class="wrapper">
+            <button onclick="searchPokemon()">🔍</button>
+            <input type="text" name="search-bar" id="search-bar" placeholder="Pokemon name">
+        </div>
+        <br>
+        <p id="error-text"></p>
+    </div>
+    <script src="home.js"></script>
+    <script src="dark.js"></script>
+</body>
+
+</html>

@@ -1,10 +1,11 @@
 :root {
-    --dark: #1f4e46;
-    --light: #B4DEE2;
+    --dark: #202124;
+    --light: #bdc1c6;
     --cube-size: min(60vw, 50vh, 300px);
     cursor: grab;
     --sharp-corner: 7%;
     --round-corner: 25%;
+    font-family: 'Varela Round', sans-serif;
 }
 :root:active {
     cursor: grabbing;
@@ -25,6 +26,13 @@ body {
     flex-flow: column nowrap;
     justify-content: center;
     align-items: center;
+}
+
+a {
+    text-decoration: none;
+    aspect-ratio: 1;
+    padding: 20px;
+    border-radius: 5px;
 }
 
 .scene {
@@ -75,10 +83,18 @@ body {
     border-radius: 20px;
     padding: 20px;
     cursor: default;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-evenly;
 }
-input,
+
 button {
     cursor: pointer;
+    border: none;
+    border-radius: 10px;
+    padding: 10px;
+    background-color: transparent;
+    font-size: 1rem;
 }
 
 /* Change appearence of the cube for the dark theme */
@@ -128,4 +144,51 @@ button {
     body {
         overflow: hidden;
     }
+}
+
+#button {
+    width: 100px;
+    aspect-ratio: 2;
+    border-radius: 50px;
+    border: 2px solid black;
+    background-color: white;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    transition: 1s;
+    position: absolute;
+    right: 0;
+    top: 0;
+    margin: 20px;
+}
+
+#dot {
+    width: 40px;
+    aspect-ratio: 1;
+    border-radius: 40px;
+    background: url("images/sun.webp");
+    background-size: 100%;
+    padding: 0;
+    transition: 1s;
+    transform: rotate(-120deg);
+    filter: grayscale(100%);
+}
+
+.dark #dot {
+    margin-left: 40px;
+    background: url("images/moon.webp");
+    transform: rotate(30deg);
+    background-size: 100%;
+}
+
+.dark {
+    background: var(--dark);
+}
+
+#home {
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-size: 2rem;
 }

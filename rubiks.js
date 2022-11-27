@@ -15,9 +15,6 @@ const topFace = $("#top")
 const bottomFace = $("#bottom")
 const leftFace = $("#left")
 const rightFace = $("#right")
-const transparentEl = $("#transparent")
-const darkEl = $("#dark")
-let isDark, isTransparent
 const style = document.createElement("style");
 document.head.appendChild(style);
 
@@ -151,7 +148,8 @@ let hovering = false;
 let rotation = {x: 0, y: 0, z: 0}
 let invertY;
 
-initializeCube()
+// initializeCube()
+queryPokemon()
 
 style.innerHTML = `
 #target {
@@ -308,10 +306,7 @@ function initializeCube() {
 
     addListeners()
 
-    // Updating transparent/dark themes by pulling from local storage
-    transparentEl.prop("checked", JSON.parse(localStorage.getItem("isTransparent")))
-    darkEl.prop("checked", JSON.parse(localStorage.getItem("isDark")))
-    updateDarkMode()
+    // Updating transparent theme by pulling from local storage
     updateTransparent()
 
     // Render colored cube
@@ -386,23 +381,21 @@ function renderFace(face, faceCode) {
 }
 
 function updateTransparent() {
-    isTransparent = transparentEl.prop("checked")
-    if(isTransparent) {
+    if(localStorage.getItem("isTransparent") === "true") {
         $("#cube").addClass("clear")
     } else {
         $("#cube").removeClass("clear")
     }
-    localStorage.setItem("isTransparent", JSON.stringify(isTransparent))
+    console.log("here")
 }
 
-function updateDarkMode() {
-    isDark = darkEl.prop("checked")
-    if(isDark) {
-        $("body").addClass("dark-mode")
+function toggleTransparent() {
+    if(localStorage.getItem("isTransparent") === "true") {
+        localStorage.setItem("isTransparent", "false")
     } else {
-        $("body").removeClass("dark-mode")
+        localStorage.setItem("isTransparent", "true")
     }
-    localStorage.setItem("isDark", JSON.stringify(isDark))
+    updateTransparent()
 }
 
 function cyclePieces(arr, a, b, c, d) {
@@ -704,6 +697,7 @@ function queryPokemon() {
     xhttp.onreadystatechange = function() {
         if(this.readyState == 4 && this.status == 200) {
             let json = JSON.parse(xhttp.responseText)
+            console.log(json)
             redURL = json.sprites.front_default
             orangeURL = json.sprites.front_shiny
             whiteURL = `images/types/${json.types[0].type.name}.avif`
@@ -730,7 +724,7 @@ function queryPokemon() {
             }
             $(".info").css("background-size", "100%") 
 
-            source = second + $("#pokemon-name").val()
+            source = second + localStorage.getItem("pokemon")
             
         }
         xhttp2.open("GET", source, true)
@@ -767,6 +761,10 @@ function queryPokemon() {
                 let temp2 = orangeURL
                 orangeURL = blueURL
                 blueURL = temp2
+            } else if(json.color.name == "brown") {
+                let temp1 = redURL
+                redURL = orangeURL
+                orangeURL = temp1
             }
 
         }
@@ -776,7 +774,7 @@ function queryPokemon() {
     let source
     const main = "https://pokeapi.co/api/v2/pokemon/"
     const second = "https://pokeapi.co/api/v2/pokemon-species/"
-    source = main + $("#pokemon-name").val()
+    source = main + localStorage.getItem("pokemon")
     xhttp.open("GET", source, true)
     xhttp.send()
 }
