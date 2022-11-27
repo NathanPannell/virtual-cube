@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
+
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Cube</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" href="images/logo.png" type="image/x-icon">
+</head>
+<!--    ondragstart and ondrop prevent user from 'dragging' elements
+    off the screen when they are rotating the cube or turning it -->
+
+<body class="body" ondragstart="return false;" ondrop="return false;">
+    <a id="home" href="index.html">🏠</a>
+
+    <button id="button" onclick="toggleDark()">
+        <div id="dot"></div>
+    </button>
+
+    <div class="scene">
+        <div class="cube" id="cube">
+            <div class="face" id="front"></div>
+            <div class="face" id="back"></div>
+            <div class="face" id="top"></div>
+            <div class="face" id="bottom"></div>
+            <div class="face" id="left"></div>
+            <div class="face" id="right"></div>
+        </div>
+    </div>
+    <div id="settings">
+        <!-- <input type="checkbox" name="transparent" id="transparent" onclick="updateTransparent()">
+        <label for="transparent">Transparent Cube</label><br> -->
+        <button onclick="resetCube()">Reset</button>
+        <!-- <button onclick="saveCube()">Save</button>
+        <button onclick="loadCube()">Load</button> -->
+        <button onclick="scrambleCube()">Scramble</button>
+        <button onclick="toggleTransparent()">Transparent</button>
+    </div>
+    <script src="rubiks.js"></script>
+    <script src="dark.js"></script>
+</body>
+
+</html>

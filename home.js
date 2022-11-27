@@ -5,7 +5,7 @@ function searchPokemon() {
         if(this.readyState == 4 && this.status == 200) {
             // Page found, save to browser and load main page
             localStorage.setItem("pokemon", name)
-            window.location.href = "index.html"
+            window.location.href = "cube.html"
         } else if(this.status == 404) {
             // Page not found, display error text
             $("#error-text").text(`Pokemon "${name}" not found, please search again`)
