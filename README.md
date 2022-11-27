@@ -1,13 +1,6 @@
-# virtual-cube
-A Virtual Rubik's Cube
-
-The cube can be turned using the following keys:
-### Front = F
-### Back = B
-### Top = U
-### Bottom = D
-### Left = L
-### Right = R
-
-Lowercase = clockwise turn <br>
-Uppercase = counter-clockwise turn
+Fully functional 3D Rubik's cube with only Vanilla JS and CSS!
+- 3D rotation✅
+- Click-to-turn✅
+- Mobile responsive✅
+- Auto-scramble feature✅
+- Transparent theme✅
