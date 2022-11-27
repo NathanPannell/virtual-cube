@@ -19,6 +19,32 @@
 
 <body class="body" ondragstart="return false;" ondrop="return false;">
     <a id="home" href="index.html">🏠</a>
+    <img id="info" src="images/info.png" alt="info" onclick="toggleInfo()">
+    <div class="info hidden">
+        <h1>How to use:</h1>
+        <p><b>Rotation:</b> Clicking outside of the cube and dragging will rotate the cube in 3D.
+            <br><br><b>Twisting faces:</b> Clicking any sticker and dragging it to a neighbouring sticker on the same face
+            will twist the cube face along that axis.
+            <br><br><b>Sticker images:</b> The sticker images represent the following
+        </p>
+        <ul>
+            <li>Standard Pokemon sprite</li>
+            <li>Shiny Pokemon sprite</li>
+            <li>Type 1</li>
+            <li>Type 2 (if applicable)</li>
+            <li>Heavy <img src="images/heavy.png"> or light <img src="images/light.png"> (30kg threshold)</li>
+            <li>Highest stat
+                <ul>
+                    <li>Attack <img src="images/stats/attack.png"></li>
+                    <li>Special attack <img src="images/stats/special-attack.png"></li>
+                    <li>Defense <img src="images/stats/defense.png"></li>
+                    <li>Special defense <img src="images/stats/special-defense.png"></li>
+                    <li>Speed <img src="images/stats/speed.png"></li>
+                    <li>Health <img src="images/stats/hp.png"></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
 
     <button id="button" onclick="toggleDark()">
         <div id="dot"></div>

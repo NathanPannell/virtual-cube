@@ -11,14 +11,23 @@
     cursor: grabbing;
 }
 
+img {
+    padding: 25px;
+    height: 2.5rem;
+    position: absolute;
+    top: 0;
+    cursor: pointer;
+}
+
 html,
 body {
     width: 100vw;
     height: 100vh;
     margin: 0;
 }
+
 body {
-    background: var(--light);
+    background: white;
 
     /* Stacking elements vertically for now
         Mobile First! */
@@ -172,7 +181,6 @@ button {
     padding: 0;
     transition: 1s;
     transform: rotate(-120deg);
-    filter: grayscale(100%);
 }
 
 .dark #dot {
@@ -191,4 +199,32 @@ button {
     left: 0;
     top: 0;
     font-size: 2rem;
+}
+
+.hidden {
+    display: none;
+}
+
+.info {
+    position: absolute;
+    z-index: 1;
+    background-color: white;
+    padding: 20px;
+    border: 5px solid black;
+}
+
+.dark .info {
+    background-color: var(--dark);
+    color: var(--light);
+}
+
+.dark img {
+    filter: invert(1);
+}
+
+li img {
+    position: relative;
+    padding: 0;
+    margin: 0;
+    height: 1rem;
 }

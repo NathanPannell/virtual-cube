@@ -778,3 +778,13 @@ function queryPokemon() {
     xhttp.open("GET", source, true)
     xhttp.send()
 }
+
+function toggleInfo() {
+    if($(".info").hasClass("hidden")) {
+        $(".info").removeClass("hidden")
+        $("#info").attr("src", "images/close.png")
+    } else {
+        $(".info").addClass("hidden")
+        $("#info").attr("src", "images/info.png")
+    }
+}
